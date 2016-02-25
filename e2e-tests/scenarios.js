@@ -5,20 +5,20 @@
 describe('my app', function() {
 
 
-  it('should automatically redirect to /view1 when location hash/fragment is empty', function() {
+  it('should automatically redirect to /gameboard when location hash/fragment is empty', function() {
     browser.get('index.html');
-    expect(browser.getLocationAbsUrl()).toMatch("/view1");
+    expect(browser.getLocationAbsUrl()).toMatch("/gameboard");
   });
 
 
-  describe('view1', function() {
+  describe('gameboard', function() {
 
     beforeEach(function() {
-      browser.get('index.html#/view1');
+      browser.get('index.html#/gameboard');
     });
 
 
-    it('should render view1 when user navigates to /view1', function() {
+    it('should render gameboard when user navigates to /gameboard', function() {
       expect(element.all(by.css('[ng-view] p')).first().getText()).
         toMatch(/partial for view 1/);
     });
