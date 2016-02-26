@@ -1,2 +1,31 @@
-<p>This is the partial for view 1.</p>
-{{helloWorld}}
+<h1>Mancala!</h1>
+
+
+<div data-ng-controller="MancalaBoardCtrl">
+    <label>Enter Number of stones: <input type="number" max="6" data-ng-change="gameBoardEvents.gameStonesChanged()" data-ng-model="gameSettings.numberOfStones"></label><br><br>
+    <label>Coloured holes: <input type="number" data-ng-change="gameBoardEvents.gameHolesChanged()" min="{{gameSettings.numberOfStones-1}}" max="{{2*(gameSettings.numberOfStones-1)}}" data-ng-model="gameSettings.mancalaHole"></label><br><br>
+    Playing with {{gameSettings.numberOfStones}} stones with {{gameSettings.mancalaHole}}.<br><br>
+
+    <table id='mancala-board'>
+        <tr class="mancala-board_row" id="mancala-board_blue-player">
+
+            <td class="mancala-board_cell mancala-board_score-cell"><div class="circle blue-border"></div></td>
+            <td ng-repeat="ballsInHole in getGameUIStates.blueMancalaHoles() track by $index" class="mancala-board_cell">
+                <div data-ng-click="cellClicked('b', $index + 1)" class="circle blue-fill">
+                    {{ballsInHole}}
+                </div>
+            </td>
+            <td ng-repeat-end class="mancala-board_cell mancala-board_score-cell"><div class="circle blue-border"></div></td>
+        </tr>
+
+        <tr class="mancala-board-row" id="mancala-board_red-player">
+            <td class="mancala-board_cell mancala-board_score-cell"><div class="circle red-border"></div></td>
+            <td ng-repeat="ballsInHole in getGameUIStates.redMancalaHoles() track by $index" class="mancala-board_cell">
+                <div data-ng-click="cellClicked('r', $index + 1)" class="circle red-fill">
+                    {{ballsInHole}}
+                </div>
+            </td>
+            <td ng-repeat-end class="mancala-board_cell mancala-board_score-cell"><div class="circle red-border"></div></td>
+        </tr>
+    </table>
+</div>

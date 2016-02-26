@@ -28,3 +28,46 @@
   content: "";
   padding: 0;
 }
+
+#mancala-board {
+  border: 1px solid black;
+}
+
+#mancala-board td {
+  border: 3px solid black;
+  height: 100px;
+  width: 100px;
+  padding:1px;
+  background-color: whitesmoke;
+}
+
+.circle
+{
+  //width:100%;
+  height:100%;
+  border-radius:50%;
+  font-size:50px;
+  line-height:100px;
+  text-align:center;
+
+}
+
+.red-border {
+  color:#ED1E23;
+  border: 6px solid #ED1E23;
+}
+
+.blue-border {
+  color:#3D86C6;
+  border: 6px solid #3D86C6;
+}
+
+.red-fill {
+  color:white;
+  background-color: #ED1E23;
+}
+
+.blue-fill {
+  color:white;
+  background-color: #3D86C6;
+}
