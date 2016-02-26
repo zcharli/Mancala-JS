@@ -14,16 +14,20 @@ angular.module('myApp.gameboard', ['ngRoute'])
 
   $scope.gameSettings = {
     numberOfStones: 6,
-    mancalaHole:6,
-    mancalaHoleArray: function() {
-
-      return new Array($scope.gameSettings.mancalaHole)
-    }
+    mancalaHole:6
   };
 
   $scope.gameBoardEvents = {
     gameStonesChanged: function() {
-      console.log($scope.numberOfStones);
+      console.log($scope.gameSettings.mancalaHole+" > "+
+          2*($scope.gameSettings.numberOfStones-1)+" ")
+
+      if($scope.gameSettings.mancalaHole < 2*($scope.gameSettings.numberOfStones-1)) {
+        $scope.gameSettings.mancalaHole -= 1;
+        console.log($scope.gameSettings.mancalaHole)
+      } else if($scope.gameSettings.mancalaHole < $scope.gameSettings.numberOfStones - 1) {
+        $scope.gameSettings.mancalaHole += 1
+      }
     },
     gameHolesChanged: function() {
       console.log("Rebuilding board")
@@ -45,12 +49,12 @@ angular.module('myApp.gameboard', ['ngRoute'])
   $scope.getGameUIStates = {
     blueMancalaHoles: function() {
       var holes = new Array($scope.gameSettings.mancalaHole);
-      holes[4] = 2;
+      //holes[1] = 2;
       return holes;
     },
     redMancalaHoles: function() {
       var holes = new Array($scope.gameSettings.mancalaHole);
-      holes[0]= 14;
+      //holes[0]= 14;
       return holes;
     }
   }
