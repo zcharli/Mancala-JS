@@ -1,66 +1,71 @@
 'use strict';
 
 angular.module('myApp.gameboard', ['ngRoute'])
-.config(['$routeProvider', function($routeProvider) {
-  console.log("route load")
-  $routeProvider.when('/gameboard', {
-    templateUrl: 'gameboard/gameboard.html',
-    controller: 'MancalaBoardCtrl'
-  });
-}])
+    .config(['$routeProvider', function ($routeProvider) {
+        console.log("route load")
+        $routeProvider.when('/gameboard', {
+            templateUrl: 'gameboard/gameboard.html',
+            controller: 'MancalaBoardCtrl'
+        });
+    }])
 
-.controller('MancalaBoardCtrl', ['$scope','GameLogic', function($scope, GameLogic) {
-  console.log(GameLogic)
+    .controller('MancalaBoardCtrl', ['$scope', 'MancalaGameFactory', function ($scope, MancalaGameFactory) {
+        //console.log(MancalaGameFactory.newGame(6, 6))
+        $scope.gameSettings = {
+            numberOfStones: 6,
+            mancalaPots: 6,
+            players: 2
+        };
+        let mancalaGame = MancalaGameFactory
+            .newGame($scope.gameSettings.numberOfStones,
+                     $scope.gameSettings.mancalaPots,
+                     $scope.gameSettings.players);
 
-  $scope.gameSettings = {
-    numberOfStones: 6,
-    mancalaHole:6
-  };
 
-  $scope.gameBoardEvents = {
-    gameStonesChanged: function() {
-      console.log($scope.gameSettings.mancalaHole+" > "+
-          2*($scope.gameSettings.numberOfStones-1)+" ")
+        $scope.gameBoardEvents = {
+            gameStonesChanged: function () {
+                console.log("Rebuilding board")
+                if ($scope.gameSettings.mancalaPots >= $scope.gameSettings.numberOfStones - 1) {
+                    $scope.gameSettings.mancalaPots -= 1;
+                } else if ($scope.gameSettings.mancalaPots < $scope.gameSettings.numberOfStones - 1) {
+                    $scope.gameSettings.mancalaPots += 1;
+                }
+                mancalaGame = MancalaGameFactory
+                    .newGame($scope.gameSettings.numberOfStones,
+                             $scope.gameSettings.mancalaPots,
+                             $scope.gameSettings.players);
+            },
+            gameStartNew: function () {
+                console.log("Rebuilding board")
+                mancalaGame = MancalaGameFactory
+                    .newGame($scope.gameSettings.numberOfStones,
+                             $scope.gameSettings.mancalaPots,
+                             $scope.gameSettings.players);
+            },
+        };
 
-      if($scope.gameSettings.mancalaHole < 2*($scope.gameSettings.numberOfStones-1)) {
-        $scope.gameSettings.mancalaHole -= 1;
-        console.log($scope.gameSettings.mancalaHole)
-      } else if($scope.gameSettings.mancalaHole < $scope.gameSettings.numberOfStones - 1) {
-        $scope.gameSettings.mancalaHole += 1
-      }
-    },
-    gameHolesChanged: function() {
-      console.log("Rebuilding board")
-      //$scope.$apply(function(){
-      //  $scope.gameSettings.mancalaHoleArray()
-      //});
-    }
-  };
+        $scope.gameHoleStates = {
+            blueHoles: function () {
 
-  $scope.gameHoleStates = {
-    blueHoles: function(){
+            },
+            redHoles: function () {
 
-    },
-    redHoles: function() {
+            }
+        }
 
-    }
-  }
+        $scope.getGameUIStates = {
+            blueMancalaHoles: function () {
+                return mancalaGame.redPotsArray;
+            },
+            redMancalaHoles: function () {
+                return mancalaGame.bluePotsArray;
+            },
+            playerTurn: mancalaGame.getPlayerTurn()
+        }
 
-  $scope.getGameUIStates = {
-    blueMancalaHoles: function() {
-      var holes = new Array($scope.gameSettings.mancalaHole);
-      //holes[1] = 2;
-      return holes;
-    },
-    redMancalaHoles: function() {
-      var holes = new Array($scope.gameSettings.mancalaHole);
-      //holes[0]= 14;
-      return holes;
-    }
-  }
-
-  $scope.cellClicked = function(playerColor, cellNumber) {
-    console.log(playerColor)
-    console.log(cellNumber)
-  }
-}]);
+        $scope.cellClicked = function (playerColor, cellNumber) {
+            console.log(playerColor)
+            console.log(cellNumber)
+            console.log(mancalaGame.getPlayerTurn());
+        }
+    }]);
