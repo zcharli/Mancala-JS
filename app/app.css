@@ -72,10 +72,10 @@
     background-color: #3D86C6;
 }
 
-.my-turn {
-    border: 3px solid greenyellow !important;
+.my-turn td {
+    border: 3px solid green !important;
 }
 
-.not-my-turn {
+.not-my-turn td {
     border: 3px solid black !important;
 }

@@ -10,17 +10,18 @@ angular.module('myApp.gameboard', ['ngRoute'])
     }])
 
     .controller('MancalaBoardCtrl', ['$scope', 'MancalaGameFactory', function ($scope, MancalaGameFactory) {
-        //console.log(MancalaGameFactory.newGame(6, 6))
+
         $scope.gameSettings = {
             numberOfStones: 6,
             mancalaPots: 6,
             players: 2
         };
+
         let mancalaGame = MancalaGameFactory
             .newGame($scope.gameSettings.numberOfStones,
-                     $scope.gameSettings.mancalaPots,
-                     $scope.gameSettings.players);
-
+                $scope.gameSettings.mancalaPots,
+                $scope.gameSettings.players);
+        $scope.mancalaGame = mancalaGame;
 
         $scope.gameBoardEvents = {
             gameStonesChanged: function () {
@@ -32,15 +33,15 @@ angular.module('myApp.gameboard', ['ngRoute'])
                 }
                 mancalaGame = MancalaGameFactory
                     .newGame($scope.gameSettings.numberOfStones,
-                             $scope.gameSettings.mancalaPots,
-                             $scope.gameSettings.players);
+                        $scope.gameSettings.mancalaPots,
+                        $scope.gameSettings.players);
             },
             gameStartNew: function () {
                 console.log("Rebuilding board")
                 mancalaGame = MancalaGameFactory
                     .newGame($scope.gameSettings.numberOfStones,
-                             $scope.gameSettings.mancalaPots,
-                             $scope.gameSettings.players);
+                        $scope.gameSettings.mancalaPots,
+                        $scope.gameSettings.players);
             },
         };
 
@@ -55,17 +56,26 @@ angular.module('myApp.gameboard', ['ngRoute'])
 
         $scope.getGameUIStates = {
             blueMancalaHoles: function () {
-                return mancalaGame.redPotsArray;
+                return mancalaGame.redPots;
             },
             redMancalaHoles: function () {
-                return mancalaGame.bluePotsArray;
+                return mancalaGame.bluePots;
+            },
+            blueHomePotScore: function () {
+                return mancalaGame.blueScore;
+            },
+            redHomePotScore: function() {
+                return mancalaGame.redScore;
             },
             playerTurn: mancalaGame.getPlayerTurn()
         }
 
-        $scope.cellClicked = function (playerColor, cellNumber) {
-            console.log(playerColor)
+        $scope.cellClicked = function (player, cellNumber) {
+            if (player != $scope.getGameUIStates.playerTurn) return;
+            console.log(player)
             console.log(cellNumber)
             console.log(mancalaGame.getPlayerTurn());
+            mancalaGame.makeMove(player, cellNumber)
+            $scope.getGameUIStates.playerTurn = mancalaGame.getPlayerTurn();
         }
     }]);
