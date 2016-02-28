@@ -67,13 +67,13 @@ angular.module('myApp.gameboard', ['ngRoute'])
             blueMancalaHoles: function () {
                 //console.log($scope.mancalaGame.bluePots);
                 $scope.bluePotArray.length = 0;
-                $scope.mancalaGame.bluePots.forEach(item => $scope.bluePotArray.push(item));
+                $scope.mancalaGame.bluePots().forEach(item => $scope.bluePotArray.push(item));
                 return $scope.bluePotArray;
             },
             redMancalaHoles: function () {
                 //console.log(mancalaGame.redPots);
                 $scope.redPotArray.length = 0;
-                $scope.mancalaGame.redPots.forEach(item => $scope.redPotArray.push(item));
+                $scope.mancalaGame.redPots().forEach(item => $scope.redPotArray.push(item));
                 return $scope.redPotArray;
             },
             blueHomePotScore: function () {

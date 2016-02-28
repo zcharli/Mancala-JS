@@ -38,8 +38,8 @@ angular.module('mancalagamefactory', [])
                 this.currentState = Array.prototype.concat.apply([], [[0], this.bluePotsArray,
                     this.redPotsArray, [0]]);
                 this.printDebug()
-                this.redPots = this.currentState.slice(this.redPotStartIndex, this.redPotEndIndex);
-                this.bluePots = this.currentState.slice(this.bluePotStartIndex, this.bluePotEndIndex);
+                //this.redPots = this.currentState.slice(this.redPotStartIndex, this.redPotEndIndex);
+                //this.bluePots = this.currentState.slice(this.bluePotStartIndex, this.bluePotEndIndex);
                 if (this.numPlayers == 0) this.startAiPlayers();
                 if (this.numPlayers == 1) this.startVersusAi();
             }
@@ -52,12 +52,14 @@ angular.module('mancalagamefactory', [])
              */
             makeMove(player, cellNumber) {
                 let modelCellMove = player * this.numPots + 1 + cellNumber;
+
                 if (this.currentState[modelCellMove] == 0) return false;
                 let lastStonePlacement = this.placeStones(modelCellMove, this.currentState[modelCellMove]);
                 this.printDebug();
 
                 // Switch the turn up
                 this.currentTurn = Math.abs(this.currentTurn - 1);
+                //console.log(this.currentTurn)
                 return true;
             }
 
@@ -71,7 +73,9 @@ angular.module('mancalagamefactory', [])
             placeStones(startPot, stonesInHand) {
                 let nextPot = 0,
                     nextMove = null,
-                    finalMove = 0;
+                    finalMove;
+                // Take the stones out of the start pot
+                this.currentState[startPot] = 0;
 
                 if (startPot >= this.redPotStartIndex) {
                     // Loop increasing on red pots, then wrap
@@ -82,6 +86,10 @@ angular.module('mancalagamefactory', [])
                             // Time to wrap around to blue pots and loop decreasing
                             nextPot = this.bluePotEndIndex - 1;
                             nextMove = x => nextPot--;
+                        } else if (nextPot === -1) {
+                            // Wrapped around on the other side, going back to red
+                            nextPot = this.redPotStartIndex;
+                            nextMove = x => nextPot++;
                         }
                         // We switch next move based on the location of the array
                         this.currentState[nextMove()] += 1;
@@ -93,8 +101,13 @@ angular.module('mancalagamefactory', [])
                     nextMove = x => nextPot--;
                     while (stonesInHand != 0) {
                         if (nextPot < 0) {
+                            // Time to wrap around red and loop increasing
                             nextPot = this.redPotStartIndex;
                             nextMove = x => nextPot++;
+                        } else if (nextPot === this.currentState.length) {
+                            // Wrapped around twice, going back to blue
+                            nextPot = this.bluePotEndIndex - 1;
+                            nextMove = x => nextPot--;
                         }
                         console.log(nextPot);
                         this.currentState[nextMove()] += 1
@@ -123,11 +136,11 @@ angular.module('mancalagamefactory', [])
             }
 
             bluePots() {
-                return this.bluePots
+                return this.currentState.slice(this.bluePotStartIndex, this.bluePotEndIndex);
             }
 
             redPots() {
-                return this.redPots
+                return this.currentState.slice(this.redPotStartIndex, this.redPotEndIndex);
             }
 
             get blueScore() {
@@ -142,6 +155,10 @@ angular.module('mancalagamefactory', [])
                 console.log(this.currentState)
                 console.log("bstart: " + this.bluePotStartIndex + " bend: " + this.bluePotEndIndex +
                     "rstart: " + this.redPotStartIndex + " rend: " + this.redPotEndIndex);
+            }
+
+            conl(msg) {
+                console.log(msg)
             }
         }
 
