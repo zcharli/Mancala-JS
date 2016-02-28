@@ -12,8 +12,8 @@ angular.module('myApp.gameboard', ['ngRoute'])
     .controller('MancalaBoardCtrl', ['$scope', 'MancalaGameFactory', function ($scope, MancalaGameFactory) {
 
         $scope.gameSettings = {
-            numberOfStones: 6,
-            mancalaPots: 6,
+            numberOfStones: 3,
+            mancalaPots: 2,
             players: 2
         };
 
@@ -21,20 +21,28 @@ angular.module('myApp.gameboard', ['ngRoute'])
             .newGame($scope.gameSettings.numberOfStones,
                 $scope.gameSettings.mancalaPots,
                 $scope.gameSettings.players);
+
+        // Set up game variables
         $scope.mancalaGame = mancalaGame;
+        $scope.bluePotArray = [];
+        $scope.redPotArray = [];
 
         $scope.gameBoardEvents = {
             gameStonesChanged: function () {
                 console.log("Rebuilding board")
-                if ($scope.gameSettings.mancalaPots >= $scope.gameSettings.numberOfStones - 1) {
+                if ($scope.gameSettings.mancalaPots >= 2*($scope.gameSettings.numberOfStones-1) &&
+                    $scope.gameSettings.mancalaPots - 1 > 2) {
+                    console.log("deduct pots")
                     $scope.gameSettings.mancalaPots -= 1;
                 } else if ($scope.gameSettings.mancalaPots < $scope.gameSettings.numberOfStones - 1) {
                     $scope.gameSettings.mancalaPots += 1;
                 }
+
                 mancalaGame = MancalaGameFactory
                     .newGame($scope.gameSettings.numberOfStones,
                         $scope.gameSettings.mancalaPots,
                         $scope.gameSettings.players);
+                $scope.mancalaGame = mancalaGame;
             },
             gameStartNew: function () {
                 console.log("Rebuilding board")
@@ -42,6 +50,7 @@ angular.module('myApp.gameboard', ['ngRoute'])
                     .newGame($scope.gameSettings.numberOfStones,
                         $scope.gameSettings.mancalaPots,
                         $scope.gameSettings.players);
+                $scope.mancalaGame = mancalaGame;
             },
         };
 
@@ -56,26 +65,36 @@ angular.module('myApp.gameboard', ['ngRoute'])
 
         $scope.getGameUIStates = {
             blueMancalaHoles: function () {
-                return mancalaGame.redPots;
+                //console.log($scope.mancalaGame.bluePots);
+                $scope.bluePotArray.length = 0;
+                $scope.mancalaGame.bluePots.forEach(item => $scope.bluePotArray.push(item));
+                return $scope.bluePotArray;
             },
             redMancalaHoles: function () {
-                return mancalaGame.bluePots;
+                //console.log(mancalaGame.redPots);
+                $scope.redPotArray.length = 0;
+                $scope.mancalaGame.redPots.forEach(item => $scope.redPotArray.push(item));
+                return $scope.redPotArray;
             },
             blueHomePotScore: function () {
-                return mancalaGame.blueScore;
+                return $scope.mancalaGame.blueScore;
             },
             redHomePotScore: function() {
-                return mancalaGame.redScore;
+                return $scope.mancalaGame.redScore;
             },
-            playerTurn: mancalaGame.getPlayerTurn()
+            playerTurn: $scope.mancalaGame.getPlayerTurn()
         }
 
         $scope.cellClicked = function (player, cellNumber) {
             if (player != $scope.getGameUIStates.playerTurn) return;
-            console.log(player)
-            console.log(cellNumber)
+            //console.log(player)
+            //console.log(cellNumber)
             console.log(mancalaGame.getPlayerTurn());
-            mancalaGame.makeMove(player, cellNumber)
-            $scope.getGameUIStates.playerTurn = mancalaGame.getPlayerTurn();
+            if(mancalaGame.makeMove(player, cellNumber)) {
+                $scope.getGameUIStates.blueMancalaHoles();
+                $scope.getGameUIStates.redMancalaHoles();
+                $scope.getGameUIStates.playerTurn = mancalaGame.getPlayerTurn();
+            }
+
         }
     }]);

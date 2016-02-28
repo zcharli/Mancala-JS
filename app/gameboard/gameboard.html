@@ -2,10 +2,10 @@
 
 
 <div>
-    <label>Enter Number of stones: <input type="number" min="1" max="6" data-ng-change="gameBoardEvents.gameStonesChanged()" data-ng-model="gameSettings.numberOfStones"></label><br><br>
+    <label>Enter Number of stones: <input type="number" min="2" max="6" data-ng-change="gameBoardEvents.gameStonesChanged()" data-ng-model="gameSettings.numberOfStones"></label><br><br>
     <label>Coloured holes:
         <input type="number" data-ng-change="gameBoardEvents.gameStartNew()"
-               min="{{gameSettings.numberOfStones-1}}" max="{{2*(gameSettings.numberOfStones-1)}}"
+               min="2" max="{{2*(gameSettings.numberOfStones-1)}}"
                data-ng-model="gameSettings.mancalaPots"></label><br><br>
     Playing with {{gameSettings.numberOfStones}} stones with {{gameSettings.mancalaPots}} pots.<br><br>
 
