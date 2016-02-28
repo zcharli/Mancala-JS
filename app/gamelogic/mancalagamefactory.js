@@ -44,6 +44,12 @@ angular.module('mancalagamefactory', [])
                 if (this.numPlayers == 1) this.startVersusAi();
             }
 
+            /**
+             * Makes a move for any player and updates the board state
+             * @param player is the player is player, AI or real
+             * @param cellNumber is the pot number on the player's side
+             * @returns {boolean} if the move was successful
+             */
             makeMove(player, cellNumber) {
                 let modelCellMove = player * this.numPots + 1 + cellNumber;
                 if (this.currentState[modelCellMove] == 0) return false;
@@ -60,7 +66,7 @@ angular.module('mancalagamefactory', [])
              * we run out of stones
              * @param startPot is index of the current pot to take the stones from
              * @param stonesInHand is the number of stones we have
-             * @return the last final move
+             * @return {number} the last final move
              */
             placeStones(startPot, stonesInHand) {
                 let nextPot = 0,
