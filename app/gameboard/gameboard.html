@@ -1,30 +1,40 @@
-<h1>Mancala!</h1>
+<h1 style="font-weight: bold`;">Mancala!</h1>
 
 
 <div>
-    <label>Enter Number of stones: <input type="number" min="2" max="6" data-ng-change="gameBoardEvents.gameStonesChanged()" data-ng-model="gameSettings.numberOfStones"></label><br><br>
-    <label>Coloured holes:
-        <input type="number" data-ng-change="gameBoardEvents.gameStartNew()"
-               min="2" max="{{2*(gameSettings.numberOfStones-1)}}"
-               data-ng-model="gameSettings.mancalaPots"></label><br><br>
-    Playing with {{gameSettings.numberOfStones}} stones with {{gameSettings.mancalaPots}} pots.<br><br>
+    <div class="row">
+        <div class="col s12 l6 m6">
+            <label for="nstones">Enter Number of stones:</label>
+            <div class="input-field">
+                <input id="nstones" type="number" min="2" max="6" data-ng-change="gameBoardEvents.gameStonesChanged()" data-ng-model="gameSettings.numberOfStones">
+            </div>
+            <label for="npots">Coloured holes:</label>
+            <div class="input-field">
+                <input id="npots" type="number" data-ng-change="gameBoardEvents.gameStartNew()"
+                       min="2" max="{{2*(gameSettings.numberOfStones-1)}}"
+                       data-ng-model="gameSettings.mancalaPots">
+            </div>
+            Playing with {{gameSettings.numberOfStones}} stones with {{gameSettings.mancalaPots}} pots.
+        </div>
 
-    <label>
-        <input type="radio" data-ng-change="gameBoardEvents.gameStartNew()"
-               data-ng-model="gameSettings.players" value="2">
-        Two Player (Red goes first)
-    </label><br/>
-    <label>
-        <input type="radio" data-ng-change="gameBoardEvents.gameStartNew()"
-               data-ng-model="gameSettings.players" value="1">
-        One Player vs Computer (you are red)
-    </label><br/>
-    <label>
-        <input type="radio" data-ng-change="gameBoardEvents.gameStartNew()"
-               data-ng-model="gameSettings.players" value="0">
-        Two Computers
-    </label><br/><br>
-
+        <div class="col s12 l6 m6">
+            <div class="row">
+                <input type="radio" id="2p" data-ng-change="gameBoardEvents.gameStartNew()"
+                       data-ng-model="gameSettings.players" value="2">
+                <label for="2p">Two Player (Red goes first)</label>
+            </div>
+            <div class="row">
+                <input id="1p" type="radio" data-ng-change="gameBoardEvents.gameStartNew()"
+                           data-ng-model="gameSettings.players" value="1">
+                <label for="1p">One Player vs Computer (you are red)</label>
+            </div>
+            <div class="row">
+                <input id="2c" type="radio" data-ng-change="gameBoardEvents.gameStartNew()"
+                       data-ng-model="gameSettings.players" value="0">
+                <label for="2c">Two Computers</label>
+            </div>
+        </div>
+    </div>
     <table id='mancala-board'>
         <tr class="mancala-board_row" ng-class="{0: 'my-turn', 1: 'not-my-turn'}[getGameUIStates.playerTurn]" id="mancala-board_blue-player">
 
