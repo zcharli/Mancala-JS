@@ -12,8 +12,8 @@ angular.module('myApp.gameboard', ['ngRoute'])
     .controller('MancalaBoardCtrl', ['$scope', 'MancalaGameFactory', function ($scope, MancalaGameFactory) {
 
         $scope.gameSettings = {
-            numberOfStones: 3,
-            mancalaPots: 2,
+            numberOfStones: 6,
+            mancalaPots: 5,
             players: 2
         };
 
@@ -89,7 +89,7 @@ angular.module('myApp.gameboard', ['ngRoute'])
             if (player != $scope.getGameUIStates.playerTurn) return;
             //console.log(player)
             //console.log(cellNumber)
-            console.log(mancalaGame.getPlayerTurn());
+
             if(mancalaGame.makeMove(player, cellNumber)) {
                 $scope.getGameUIStates.blueMancalaHoles();
                 $scope.getGameUIStates.redMancalaHoles();

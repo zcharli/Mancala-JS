@@ -18,8 +18,6 @@ angular.module('mancalagamefactory', [])
                 this.numPots = pots;
                 this.numPlayers = players;
                 this.playersPlaying = [];
-                this.blueScorePot = 0;
-                this.redScorePot = 0;
                 // Important Indexes
                 this.bluePotStartIndex = 1;
                 this.bluePotEndIndex = this.bluePotStartIndex + this.numPots;
@@ -40,8 +38,8 @@ angular.module('mancalagamefactory', [])
                 this.printDebug()
                 //this.redPots = this.currentState.slice(this.redPotStartIndex, this.redPotEndIndex);
                 //this.bluePots = this.currentState.slice(this.bluePotStartIndex, this.bluePotEndIndex);
-                if (this.numPlayers == 0) this.startAiPlayers();
-                if (this.numPlayers == 1) this.startVersusAi();
+                if (this.numPlayers === 0) this.startAiPlayers();
+                if (this.numPlayers === 1) this.startVersusAi();
             }
 
             /**
@@ -53,10 +51,22 @@ angular.module('mancalagamefactory', [])
             makeMove(player, cellNumber) {
                 let modelCellMove = player * this.numPots + 1 + cellNumber;
 
-                if (this.currentState[modelCellMove] == 0) return false;
+                if (this.currentState[modelCellMove] === 0) return false;
                 let lastStonePlacement = this.placeStones(modelCellMove, this.currentState[modelCellMove]);
-                this.printDebug();
-
+                //this.printDebug();
+                if(player === 0 && lastStonePlacement === this.blueScoreIndex) return true;
+                if(player === 1 && lastStonePlacement === this.redScoreIndex) return true;
+                if(player === 0 && this.currentState[lastStonePlacement] === 1) {
+                    // Check lastStone in Blue
+                    if(this.bluePotStartIndex <= lastStonePlacement && lastStonePlacement < this.bluePotEndIndex) {
+                        this.takeOpponentsStones(lastStonePlacement, player);
+                    }
+                }else if(player === 1 && this.currentState[lastStonePlacement] === 1) {
+                    // Check lastStone in Red
+                    if(this.redPotStartIndex <= lastStonePlacement && lastStonePlacement < this.redPotEndIndex) {
+                        this.takeOpponentsStones(lastStonePlacement, player);
+                    }
+                }
                 // Switch the turn up
                 this.currentTurn = Math.abs(this.currentTurn - 1);
                 //console.log(this.currentTurn)
@@ -109,7 +119,6 @@ angular.module('mancalagamefactory', [])
                             nextPot = this.bluePotEndIndex - 1;
                             nextMove = x => nextPot--;
                         }
-                        console.log(nextPot);
                         this.currentState[nextMove()] += 1
                         --stonesInHand;
                     }
@@ -120,6 +129,18 @@ angular.module('mancalagamefactory', [])
                 nextMove();
                 if (nextPot > finalMove) return --finalMove;
                 else return ++finalMove;
+            }
+
+            takeOpponentsStones(index, player) {
+                if(player === 0) {
+                    let potToTakeFrom = index + this.numPots;
+                    this.currentState[this.blueScoreIndex] += this.currentState[potToTakeFrom];
+                    this.currentState[potToTakeFrom] = 0;
+                } else {
+                    let potToTakeFrom = index - this.numPots;
+                    this.currentState[this.redScoreIndex] += this.currentState[potToTakeFrom];
+                    this.currentState[potToTakeFrom] = 0;
+                }
             }
 
             getPlayerTurn() {
