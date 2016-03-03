@@ -35,28 +35,40 @@
             </div>
         </div>
     </div>
+
     <table id='mancala-board'>
         <tr class="mancala-board_row" ng-class="{0: 'my-turn', 1: 'not-my-turn'}[getGameUIStates.playerTurn]" id="mancala-board_blue-player">
 
-            <td class="mancala-board_cell mancala-board_score-cell"><div class="circle blue-border">{{getGameUIStates.blueHomePotScore()}}</div></td>
+            <td class="mancala-board_cell mancala-board_score-cell"><div class="circle blue-border">{{getGameUIStates.blueLeftScorePot()}}</div></td>
             <td ng-repeat="ballsInHole in getGameUIStates.blueMancalaHoles() track by $index"
                 class="mancala-board_cell">
-                <div data-ng-click="cellClicked(0, $index )" class="circle blue-fill">
+                <div data-ng-click="cellClicked(0, $index )"
+                     class="circle blue-fill"
+                     ns-popover-template="direction-selection"
+                     ns-popover-trigger="click"
+                     ns-popover-placement="bottom">
                     {{ballsInHole}}
                 </div>
             </td>
-            <td ng-repeat-end class="mancala-board_cell mancala-board_score-cell"><div class="circle blue-border"></div></td>
+            <td ng-repeat-end class="mancala-board_cell mancala-board_score-cell"><div class="circle blue-border">{{getGameUIStates.blueRightScorePot()}}</div></td>
         </tr>
 
         <tr class="mancala-board-row" ng-class="{1: 'my-turn', 0: 'not-my-turn'}[getGameUIStates.playerTurn]"  id="mancala-board_red-player">
-            <td class="mancala-board_cell mancala-board_score-cell"><div class="circle red-border"></div></td>
+            <td class="mancala-board_cell mancala-board_score-cell"><div class="circle red-border">{{getGameUIStates.redLeftScorePot()}}</div></td>
             <td ng-repeat="ballsInHole in getGameUIStates.redMancalaHoles() track by $index"
                 class="mancala-board_cell">
                 <div data-ng-click="cellClicked(1, $index)" class="circle red-fill">
                     {{ballsInHole}}
                 </div>
             </td>
-            <td ng-repeat-end class="mancala-board_cell mancala-board_score-cell"><div class="circle red-border">{{getGameUIStates.redHomePotScore()}}</div></td>
+            <td ng-repeat-end class="mancala-board_cell mancala-board_score-cell"><div class="circle red-border">{{getGameUIStates.redRightScorePot()}}</div></td>
         </tr>
     </table>
 </div>
+
+<script type="text/ng-template" id="direction-selection">
+    <ul>
+        <li>hi</li>
+        <!--<li ng-repeat="item in items"><a>{{item.name}}</a></li>-->
+    </ul>
+</script>

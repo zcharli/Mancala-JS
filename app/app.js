@@ -7,6 +7,7 @@ angular.module('myApp', [
     'mancalagamefactory',
     'minmaxnodefactory',
     'playerfactory',
+    'uiComponents',
     'myApp.view2',
     'myApp.version'
 ]).

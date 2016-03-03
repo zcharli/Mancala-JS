@@ -1,18 +1,19 @@
 'use strict';
 
-angular.module('myApp.gameboard', ['ngRoute'])
-    .config(['$routeProvider', function ($routeProvider) {
+angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap'])
+    .config(['$routeProvider', function ($routeProvider, $popover) {
         console.log("route load")
         $routeProvider.when('/gameboard', {
             templateUrl: 'gameboard/gameboard.html',
             controller: 'MancalaBoardCtrl'
         });
+        console.log($popover)
     }])
 
     .controller('MancalaBoardCtrl', ['$scope', 'MancalaGameFactory', function ($scope, MancalaGameFactory) {
 
         $scope.gameSettings = {
-            numberOfStones: 6,
+            numberOfStones: 4,
             mancalaPots: 5,
             players: 2
         };
@@ -67,29 +68,38 @@ angular.module('myApp.gameboard', ['ngRoute'])
             blueMancalaHoles: function () {
                 //console.log($scope.mancalaGame.bluePots);
                 $scope.bluePotArray.length = 0;
-                $scope.mancalaGame.bluePots().forEach(item => $scope.bluePotArray.push(item));
+                $scope.mancalaGame.bluePots().forEach(item =>
+                    $scope.bluePotArray.push(item));
                 return $scope.bluePotArray;
             },
             redMancalaHoles: function () {
                 //console.log(mancalaGame.redPots);
                 $scope.redPotArray.length = 0;
-                $scope.mancalaGame.redPots().forEach(item => $scope.redPotArray.push(item));
+                $scope.mancalaGame.redPots().forEach(item =>
+                    $scope.redPotArray.push(item));
                 return $scope.redPotArray;
             },
-            blueHomePotScore: function () {
-                return $scope.mancalaGame.blueScore;
+            blueLeftScorePot: function () {
+                return $scope.mancalaGame.blueLeftScore;
             },
-            redHomePotScore: function() {
-                return $scope.mancalaGame.redScore;
+            blueRightScorePot: function () {
+                return $scope.mancalaGame.blueRightScore;
+            },
+            redLeftScorePot: function() {
+                return $scope.mancalaGame.redLeftScore;
+            },
+            redRightScorePot: function() {
+                return $scope.mancalaGame.redRightScore;
             },
             playerTurn: $scope.mancalaGame.getPlayerTurn()
         }
 
         $scope.cellClicked = function (player, cellNumber) {
+
             if (player != $scope.getGameUIStates.playerTurn) return;
             //console.log(player)
             //console.log(cellNumber)
-
+            console.log(mancalaGame.getPlayerTurn());
             if(mancalaGame.makeMove(player, cellNumber)) {
                 $scope.getGameUIStates.blueMancalaHoles();
                 $scope.getGameUIStates.redMancalaHoles();
