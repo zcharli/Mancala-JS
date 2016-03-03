@@ -48,7 +48,7 @@ angular.module('minmaxalgorithmfactory', [])
 
         return {
             newMancalaMinMaxAlgorithm: function(state) {
-                return new MinMaxAlgorithm(state)
+                return new MinMaxAlgorithm(state);
             }
         }
     });
