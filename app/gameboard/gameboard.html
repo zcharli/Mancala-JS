@@ -42,12 +42,7 @@
             <td class="mancala-board_cell mancala-board_score-cell"><div class="circle blue-border">{{getGameUIStates.blueLeftScorePot()}}</div></td>
             <td ng-repeat="ballsInHole in getGameUIStates.blueMancalaHoles() track by $index"
                 class="mancala-board_cell">
-                <div data-ng-click="cellClicked(0, $index )"
-                     class="circle blue-fill"
-                     ns-popover-template="direction-selection"
-                     ns-popover-trigger="click"
-                     ns-popover-placement="bottom">
-                    {{ballsInHole}}
+                <div move-popover="{{$index}} top 0">
                 </div>
             </td>
             <td ng-repeat-end class="mancala-board_cell mancala-board_score-cell"><div class="circle blue-border">{{getGameUIStates.blueRightScorePot()}}</div></td>
@@ -57,8 +52,7 @@
             <td class="mancala-board_cell mancala-board_score-cell"><div class="circle red-border">{{getGameUIStates.redLeftScorePot()}}</div></td>
             <td ng-repeat="ballsInHole in getGameUIStates.redMancalaHoles() track by $index"
                 class="mancala-board_cell">
-                <div data-ng-click="cellClicked(1, $index)" class="circle red-fill">
-                    {{ballsInHole}}
+                <div move-popover="{{$index}} bottom 1">
                 </div>
             </td>
             <td ng-repeat-end class="mancala-board_cell mancala-board_score-cell"><div class="circle red-border">{{getGameUIStates.redRightScorePot()}}</div></td>

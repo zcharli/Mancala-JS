@@ -4,7 +4,7 @@
 'use strict';
 
 angular.module('mancalagamefactory', [])
-    .factory('MancalaGameFactory', function (PlayerFactory) {
+    .factory('MancalaGameFactory', function (PlayerFactory, MinMaxAlgorithm) {
         /**
          * Representation
          * [bscore, b , b, b, bscore, rscore, r, r ,r, rscore]
@@ -14,9 +14,7 @@ angular.module('mancalagamefactory', [])
          */
         class MancalaGameLogic {
             constructor(stones, pots, players) {
-                this.numStones = stones;
-                this.numPots = pots;
-                this.numPlayers = players;
+                this.numStones = stones, this.numPots = pots, this.numPlayers = players,
                 this.playersPlaying = [];
                 // Important Indexes
                 this.bluePotStartIndex = 1;
@@ -38,9 +36,11 @@ angular.module('mancalagamefactory', [])
                 this.currentState = Array.prototype.concat.apply([], [[0], this.bluePotsArray,
                     [0], [0], this.redPotsArray, [0]]);
                 this.printDebug()
-                //this.redPots = this.currentState.slice(this.redPotStartIndex, this.redPotEndIndex);
-                //this.bluePots = this.currentState.slice(this.bluePotStartIndex, this.bluePotEndIndex);
-                if (this.numPlayers === 0) this.startAiPlayers();
+                const MAX_DEPTH = 5;
+                if (this.numPlayers === 0) {
+                    this.minMaxAlgorithm = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(this.currentState, MAX_DEPTH);
+                    this.startAiPlayers();
+                }
                 if (this.numPlayers === 1) this.startVersusAi();
             }
 
@@ -48,14 +48,16 @@ angular.module('mancalagamefactory', [])
              * Makes a move for any player and updates the board state
              * @param player is the player is player, AI or real
              * @param cellNumber is the pot number on the player's side
+             * @param direction is the chosen direction to play
              * @returns {boolean} if the move was successful
              */
-            makeMove(player, cellNumber) {
+            makeMove(player, cellNumber, direction) {
                 let modelCellMove = player === 0 ? this.bluePotStartIndex + cellNumber
                     : this.redPotStartIndex + cellNumber;
 
                 if (this.currentState[modelCellMove] === 0) return false;
-                let lastStonePlacement = this.placeStones(modelCellMove, this.currentState[modelCellMove], player);
+                let lastStonePlacement = this.placeStones(modelCellMove, this.currentState[modelCellMove],
+                    player, direction);
                 //this.printDebug();
                 if(player === 0 && (lastStonePlacement === this.blueLeftScoreIndex
                     || lastStonePlacement === this.blueRightScoreIndex)) return true;
@@ -76,6 +78,8 @@ angular.module('mancalagamefactory', [])
                 // Switch the turn up
                 this.currentTurn = Math.abs(this.currentTurn - 1);
                 //console.log(this.currentTurn)
+                if (this.numPlayers === 1)
+                    this.computeAiMove();
                 return true;
             }
 
@@ -84,19 +88,28 @@ angular.module('mancalagamefactory', [])
              * we run out of stones
              * @param startPot is index of the current pot to take the stones from
              * @param stonesInHand is the number of stones we have
+             * @param player who wanted to play (2)
+             * @param the direction to place stones
              * @return {number} the last final move
              */
-            placeStones(startPot, stonesInHand, player) {
-                let nextPot = 0,
-                    nextMove = null,
-                    finalMove;
+            placeStones(startPot, stonesInHand, player, direction) {
+                let nextPot = 0, nextMove = null, finalMove;
+
+                // determine direction
+                if(direction == 0) {
+                    // Go left
+                    nextMove = x => nextPot--;
+                    nextPot = startPot - 1;
+                } else {
+                    // Go right
+                    nextMove = x => nextPot++;
+                    nextPot = startPot + 1;
+                }
                 // Take the stones out of the start pot
                 this.currentState[startPot] = 0;
 
                 if (startPot >= this.redPotStartIndex) {
                     // Loop increasing on red pots, then wrap
-                    nextPot = startPot + 1;
-                    nextMove = x => nextPot++;
                     while (stonesInHand != 0) {
                         if (nextPot >= this.currentState.length) {
                             // Time to wrap around to blue pots and loop decreasing
@@ -123,8 +136,6 @@ angular.module('mancalagamefactory', [])
                     }
                 } else {
                     // Loop decreasing on blue pots, then wrap
-                    nextPot = startPot - 1;
-                    nextMove = x => nextPot--;
                     while (stonesInHand != 0) {
                         if (nextPot < 0) {
                             // Time to wrap around red and loop increasing
@@ -157,6 +168,17 @@ angular.module('mancalagamefactory', [])
                 else return ++finalMove;
             }
 
+            computeAiMove() {
+
+            }
+
+            /**
+             * Takes the opponents stone from his opposite side when we land on the case
+             * where the last stone is put in a zero stone pot
+             * @param index is the index to of the row to take
+             * @param player is the player profiting
+             * @param cellNumber is the cell number of the player's row
+             */
             takeOpponentsStones(index, player, cellNumber) {
                 let closestPot =  0;
                 if(player === 0) {
@@ -182,6 +204,8 @@ angular.module('mancalagamefactory', [])
 
             startVersusAi() {
                 console.log("See if you can beat the computer!")
+                if(this.getPlayerTurn() == 1) return; // Not my turn
+                let bestMove = this.minMaxAlgorithm.findBestMove(this.currentState);
 
             }
 

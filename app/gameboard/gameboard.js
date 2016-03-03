@@ -10,8 +10,8 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap'])
         console.log($popover)
     }])
 
-    .controller('MancalaBoardCtrl', ['$scope', 'MancalaGameFactory', function ($scope, MancalaGameFactory) {
-
+    .controller('MancalaBoardCtrl', ['$scope','$compile', 'MancalaGameFactory', function ( $scope, $compile, MancalaGameFactory) {
+        //console.log($compile);
         $scope.gameSettings = {
             numberOfStones: 4,
             mancalaPots: 5,
@@ -55,12 +55,10 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap'])
             },
         };
 
-        $scope.gameHoleStates = {
-            blueHoles: function () {
-
-            },
-            redHoles: function () {
-
+        $scope.gamePotStates = {
+            getMoveOptions: function(index) {
+                return $compile("<button class='move-choice btn' data-ng-click='cellClicked(0, "+index+",0)'>&larr;</button>"+
+                       "<button class='move-choice btn' data-ng-click='cellClicked(0, "+index+",1)' >&rarr;</button>")($scope);
             }
         }
 
@@ -94,13 +92,11 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap'])
             playerTurn: $scope.mancalaGame.getPlayerTurn()
         }
 
-        $scope.cellClicked = function (player, cellNumber) {
+        $scope.cellClicked = function (player, cellNumber, direction) {
 
             if (player != $scope.getGameUIStates.playerTurn) return;
-            //console.log(player)
-            //console.log(cellNumber)
-            console.log(mancalaGame.getPlayerTurn());
-            if(mancalaGame.makeMove(player, cellNumber)) {
+            //console.log(mancalaGame.getPlayerTurn());
+            if(mancalaGame.makeMove(player, cellNumber, direction)) {
                 $scope.getGameUIStates.blueMancalaHoles();
                 $scope.getGameUIStates.redMancalaHoles();
                 $scope.getGameUIStates.playerTurn = mancalaGame.getPlayerTurn();

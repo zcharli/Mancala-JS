@@ -5,7 +5,7 @@ angular.module('myApp', [
     'ngRoute',
     'myApp.gameboard',
     'mancalagamefactory',
-    'minmaxnodefactory',
+    'minmaxalgorithmfactory',
     'playerfactory',
     'uiComponents',
     'myApp.view2',
