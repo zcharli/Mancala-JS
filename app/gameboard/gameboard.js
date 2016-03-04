@@ -52,6 +52,7 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap'])
                         $scope.gameSettings.mancalaPots,
                         $scope.gameSettings.players);
                 $scope.mancalaGame = mancalaGame;
+                $scope.getGameUIStates.playerTurn = mancalaGame.getPlayerTurn();
             },
         };
 

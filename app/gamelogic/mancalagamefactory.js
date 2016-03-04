@@ -14,6 +14,7 @@ angular.module('mancalagamefactory', [])
          */
         class MancalaGameLogic {
             constructor(stones, pots, players) {
+                const MAX_DEPTH = 5;
                 this.numStones = stones, this.numPots = pots, this.numPlayers = players,
                 this.playersPlaying = [];
                 // Important Indexes
@@ -36,12 +37,20 @@ angular.module('mancalagamefactory', [])
                 this.currentState = Array.prototype.concat.apply([], [[0], this.bluePotsArray,
                     [0], [0], this.redPotsArray, [0]]);
                 this.printDebug()
-                const MAX_DEPTH = 5;
+                this.conl(this.numPlayers == 1)
                 if (this.numPlayers === 0) {
-                    this.minMaxAlgorithm = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(this.currentState, MAX_DEPTH);
+
+                    this.blueBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(this.currentState, MAX_DEPTH, 0, this);
+                    this.redBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(this.currentState, MAX_DEPTH, 1, this);
+
                     this.startAiPlayers();
                 }
-                if (this.numPlayers === 1) this.startVersusAi();
+                if (this.numPlayers == 1) {
+                    this.conl(this);
+                    this.blueBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(this.currentState, MAX_DEPTH, 0, this);
+
+                    this.startVersusAi();
+                }
             }
 
             /**
@@ -205,7 +214,7 @@ angular.module('mancalagamefactory', [])
             startVersusAi() {
                 console.log("See if you can beat the computer!")
                 if(this.getPlayerTurn() == 1) return; // Not my turn
-                let bestMove = this.minMaxAlgorithm.findBestMove(this.currentState);
+                let bestMove = this.blueBot.findBestMove(this.currentState);
 
             }
 
@@ -238,6 +247,7 @@ angular.module('mancalagamefactory', [])
             }
 
             printDebug() {
+                this.conl(this.playersPlaying);
                 console.log(this.currentState)
                 console.log("bstart: " + this.bluePotStartIndex + " bend: " + this.bluePotEndIndex +
                     "rstart: " + this.redPotStartIndex + " rend: " + this.redPotEndIndex);

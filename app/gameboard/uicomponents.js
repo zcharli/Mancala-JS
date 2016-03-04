@@ -20,7 +20,7 @@ app.directive('movePopover', ["$popover", "$compile","$timeout", function($popov
         restrict: "EAC",
         template: "<div class='pop-over-move circle blue-fill'> {{ballsInHole}}</div>",
         link: function(scope, element, attrs) {
-            console.log(scope.getGameUIStates.playerTurn)
+            //console.log(scope.getGameUIStates.playerTurn)
             var index = attrs["movePopover"].split(" ");
             $(".pop-over-move").popover({
                 //title: 'Choose:',
