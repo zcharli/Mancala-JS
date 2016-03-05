@@ -67,7 +67,21 @@ angular.module('mancalagamefactory', [])
                 if (this.currentState[modelCellMove] === 0) return false;
                 let lastStonePlacement = this.placeStones(modelCellMove, this.currentState[modelCellMove],
                     player, direction);
-                //this.printDebug();
+
+                if(player == 0) {
+                    for(let i = this.bluePotStartIndex; i < this.bluePotEndIndex; ++i) {
+                        this.gameOver = this.currentState[i] === 0 && this.gameOver;
+                    }
+                } else {
+                    for(let i = this.redPotStartIndex; i < this.redPotEndIndex; ++i) {
+                        this.gameOver = this.currentState[i] === 0 && this.gameOver;
+                    }
+                }
+
+                if(this.gameOver) {
+                    return true;
+                }
+
                 if(player === 0 && (lastStonePlacement === this.blueLeftScoreIndex
                     || lastStonePlacement === this.blueRightScoreIndex)) return true;
                 if(player === 1 && (lastStonePlacement === this.redLeftScoreIndex
@@ -215,7 +229,7 @@ angular.module('mancalagamefactory', [])
                 console.log("See if you can beat the computer!")
                 if(this.getPlayerTurn() == 1) return; // Not my turn
                 let bestMove = this.blueBot.findBestMove(this.currentState);
-
+                console.log(bestMove);
             }
 
             startAiPlayers() {
