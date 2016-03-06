@@ -15,8 +15,11 @@ angular.module('mancalagamefactory', [])
         class MancalaGameLogic {
             constructor(stones, pots, players) {
                 const MAX_DEPTH = 3;
-                this.numStones = stones, this.numPots = pots, this.numPlayers = players,
+                this.numStones = stones;
+                this.numPots = pots;
+                this.numPlayers = players;
                 this.playersPlaying = [];
+                this.winner = 0;
                 // Important Indexes
                 this.bluePotStartIndex = 1;
                 this.bluePotEndIndex = this.bluePotStartIndex + this.numPots;
@@ -36,21 +39,20 @@ angular.module('mancalagamefactory', [])
                 this.gameOver = false;
                 this.currentState = Array.prototype.concat.apply([], [[0], this.bluePotsArray,
                     [0], [0], this.redPotsArray, [0]]);
-                this.printDebug()
-                this.conl(this.numPlayers == 1)
-                if (this.numPlayers === 0) {
+                this.printDebug();
+                if (this.numPlayers == 0) {
 
-                    this.blueBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(this.currentState, MAX_DEPTH, 0, this);
-                    this.redBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(this.currentState, MAX_DEPTH, 1, this);
-
-                    this.startAiPlayers();
+                    this.blueBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(this.currentState, MAX_DEPTH, 0,
+                        this, this.heuristicTwo);
+                    this.redBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(this.currentState, MAX_DEPTH, 1,
+                        this, this.heuristicOne());
                 }
                 if (this.numPlayers == 1) {
                     this.conl(this);
-                    this.blueBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(this.currentState, MAX_DEPTH, 0, this, this.heuristicOne);
-
-                    this.startVersusAi();
+                    this.blueBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(this.currentState, MAX_DEPTH, 0,
+                        this, this.heuristicOne);
                 }
+                this.lastMove = {};
             }
 
             /**
@@ -61,6 +63,7 @@ angular.module('mancalagamefactory', [])
              * @returns {boolean} if the move was successful
              */
             makeMove(player, cellNumber, direction) {
+                if (this.gameOver) return false;
                 let modelCellMove = player === 0 ? this.bluePotStartIndex + cellNumber
                     : this.redPotStartIndex + cellNumber;
 
@@ -68,41 +71,41 @@ angular.module('mancalagamefactory', [])
                 let lastStonePlacement = this.placeStones(modelCellMove, this.currentState[modelCellMove],
                     player, direction);
 
-                if(player == 0) {
-                    for(let i = this.bluePotStartIndex; i < this.bluePotEndIndex; ++i) {
+                if (player == 0) {
+                    for (let i = this.bluePotStartIndex; i < this.bluePotEndIndex; ++i) {
                         this.gameOver = this.currentState[i] === 0 && this.gameOver;
                     }
+                    if(this.gameOver) this.winner = 0;
                 } else {
-                    for(let i = this.redPotStartIndex; i < this.redPotEndIndex; ++i) {
+                    for (let i = this.redPotStartIndex; i < this.redPotEndIndex; ++i) {
                         this.gameOver = this.currentState[i] === 0 && this.gameOver;
                     }
+                    if(this.gameOver) this.winner = 1;
                 }
 
-                if(this.gameOver) {
-                    return true;
+                if (this.gameOver) {
+                    return false;
                 }
 
-                if(player === 0 && (lastStonePlacement === this.blueLeftScoreIndex
+                if (player === 0 && (lastStonePlacement === this.blueLeftScoreIndex
                     || lastStonePlacement === this.blueRightScoreIndex)) return true;
-                if(player === 1 && (lastStonePlacement === this.redLeftScoreIndex
-                    ||lastStonePlacement === this.redRightScoreIndex)) return true;
+                if (player === 1 && (lastStonePlacement === this.redLeftScoreIndex
+                    || lastStonePlacement === this.redRightScoreIndex)) return true;
 
-                if(player === 0 && this.currentState[lastStonePlacement] === 1) {
+                if (player === 0 && this.currentState[lastStonePlacement] === 1) {
                     // Check lastStone in Blue
-                    if(this.bluePotStartIndex <= lastStonePlacement && lastStonePlacement < this.bluePotEndIndex) {
+                    if (this.bluePotStartIndex <= lastStonePlacement && lastStonePlacement < this.bluePotEndIndex) {
                         this.takeOpponentsStones(lastStonePlacement, player, cellNumber);
                     }
-                }else if(player === 1 && this.currentState[lastStonePlacement] === 1) {
+                } else if (player === 1 && this.currentState[lastStonePlacement] === 1) {
                     // Check lastStone in Red
-                    if(this.redPotStartIndex <= lastStonePlacement && lastStonePlacement < this.redPotEndIndex) {
+                    if (this.redPotStartIndex <= lastStonePlacement && lastStonePlacement < this.redPotEndIndex) {
                         this.takeOpponentsStones(lastStonePlacement, player, cellNumber);
                     }
                 }
                 // Switch the turn up
                 this.currentTurn = Math.abs(this.currentTurn - 1);
-                //console.log(this.currentTurn)
-                if (this.numPlayers === 1)
-                    this.computeAiMove();
+                console.log(this.currentTurn)
                 return true;
             }
 
@@ -112,14 +115,14 @@ angular.module('mancalagamefactory', [])
              * @param startPot is index of the current pot to take the stones from
              * @param stonesInHand is the number of stones we have
              * @param player who wanted to play (2)
-             * @param the direction to place stones
+             * @param direction for the direction to place stones
              * @return {number} the last final move
              */
             placeStones(startPot, stonesInHand, player, direction) {
                 let nextPot = 0, nextMove = null, finalMove;
 
                 // determine direction
-                if(direction == 0) {
+                if (direction == 0) {
                     // Go left
                     nextMove = x => nextPot--;
                     nextPot = startPot - 1;
@@ -143,12 +146,12 @@ angular.module('mancalagamefactory', [])
                             nextPot = this.redLeftScoreIndex;
                             nextMove = x => nextPot++;
                         }
-                        if(player === 0 && (nextPot === this.redLeftScoreIndex
+                        if (player === 0 && (nextPot === this.redLeftScoreIndex
                             || nextPot === this.redRightScoreIndex)) {
                             nextMove();
                             continue;
                         }
-                        else if(player == 1 && (nextPot === this.blueLeftScoreIndex
+                        else if (player == 1 && (nextPot === this.blueLeftScoreIndex
                             || nextPot === this.blueRightScoreIndex)) {
                             nextMove();
                             continue;
@@ -169,17 +172,17 @@ angular.module('mancalagamefactory', [])
                             nextPot = this.blueRightScoreIndex;
                             nextMove = x => nextPot--;
                         }
-                        if(player === 0 && (nextPot === this.redLeftScoreIndex
+                        if (player === 0 && (nextPot === this.redLeftScoreIndex
                             || nextPot === this.redRightScoreIndex)) {
                             nextMove();
                             continue;
                         }
-                        else if(player == 1 && (nextPot === this.blueLeftScoreIndex
+                        else if (player == 1 && (nextPot === this.blueLeftScoreIndex
                             || nextPot === this.blueRightScoreIndex)) {
                             nextMove();
                             continue;
                         }
-                        this.currentState[nextMove()] += 1
+                        this.currentState[nextMove()] += 1;
                         --stonesInHand;
                     }
 
@@ -191,8 +194,30 @@ angular.module('mancalagamefactory', [])
                 else return ++finalMove;
             }
 
-            computeAiMove() {
-
+            computeAiMove(player) {
+                console.log("See if you can beat the computer!")
+                if (this.numPlayers == 1 && player === 0) {
+                    let bestMove = this.blueBot.findBestMove(this.currentState);
+                    console.log("blue made move...");
+                    console.log(bestMove);
+                    this.lastMove = bestMove;
+                    return this.makeMove(0, bestMove.move, bestMove.direction);
+                } else if (this.numPlayers == 0) {
+                    if (player === 0) {
+                        let bestMove = this.blueBot.findBestMove(this.currentState);
+                        console.log("red made move...");
+                        console.log(bestMove);
+                        this.lastMove = bestMove;
+                        return this.makeMove(0, bestMove.move, bestMove.direction);
+                    } else {
+                        let bestMove = this.redBot.findBestMove(this.currentState);
+                        console.log("blue made move...");
+                        console.log(bestMove);
+                        this.lastMove = bestMove;
+                        return this.makeMove(0, bestMove.move, bestMove.direction);
+                    }
+                }
+                return false;
             }
 
             /**
@@ -203,8 +228,8 @@ angular.module('mancalagamefactory', [])
              * @param cellNumber is the cell number of the player's row
              */
             takeOpponentsStones(index, player, cellNumber) {
-                let closestPot =  0;
-                if(player === 0) {
+                let closestPot = 0;
+                if (player === 0) {
                     // Taking from red
                     closestPot = cellNumber > this.numPots / 2 ? this.blueRightScoreIndex
                         : this.blueLeftScoreIndex;
@@ -218,37 +243,30 @@ angular.module('mancalagamefactory', [])
                     let potToTakeFrom = index - this.numPots - 2;
                     this.currentState[closestPot] += this.currentState[potToTakeFrom];
                     this.currentState[potToTakeFrom] = 0;
-                };
+                }
             }
 
             getPlayerTurn() {
                 return this.currentTurn;
             }
 
-            startVersusAi() {
-                console.log("See if you can beat the computer!")
-                if(this.getPlayerTurn() == 1) return; // Not my turn
-                let bestMove = this.blueBot.findBestMove(this.currentState);
-                console.log(bestMove);
-            }
-
             heuristicOne(state, player) {
                 let myStones = 0, theirStones = 0;
-                if(player === 1) {
-                    for(let i = this.redPotStartIndex; i < this.numPots; ++i) {
+                if (player === 1) {
+                    for (let i = this.redPotStartIndex; i < this.numPots + this.redPotStartIndex; ++i) {
                         myStones += state[i];
                     }
-                    for(let i = this.bluePotStartIndex; i < this.numPots; ++i) {
+                    for (let i = this.bluePotStartIndex; i < this.numPots + this.bluePotStartIndex; ++i) {
                         theirStones += state[i];
                     }
                     return ((state[this.redRightScoreIndex] + state[this.redLeftScoreIndex]) -
-                            (state[this.blueLeftScoreIndex] + state[this.blueRightScoreIndex])) +
-                            (myStones - theirStones);
+                        (state[this.blueLeftScoreIndex] + state[this.blueRightScoreIndex])) +
+                        (myStones - theirStones);
                 } else {
-                    for(let i = this.bluePotStartIndex; i < this.numPots; ++i) {
+                    for (let i = this.bluePotStartIndex; i < this.numPots + this.bluePotStartIndex; ++i) {
                         myStones += state[i];
                     }
-                    for(let i = this.redPotStartIndex; i < this.numPots; ++i) {
+                    for (let i = this.redPotStartIndex; i < this.numPots + this.redPotStartIndex; ++i) {
                         theirStones += state[i];
                     }
                     return ((state[this.blueLeftScoreIndex] + state[this.blueRightScoreIndex]) -
@@ -258,18 +276,32 @@ angular.module('mancalagamefactory', [])
             }
 
             heuristicTwo(state, player) {
-                let myScore = 0;
-                if(player === 1) {
-                    myScore = state[this.redRightScoreIndex] + state[this.redLeftScoreIndex];
-
+                let myStones = 0, theirStones = 0, myScore = 0, theirScore = 0;
+                if (player === 1) {
+                    for (let i = this.redPotStartIndex + 1; i < this.numPots + this.redPotStartIndex - 1; ++i) {
+                        myStones += state[i];
+                    }
+                    myStones += state[this.redPotStartIndex] * 2 + state[this.redPotEndIndex - 1] * 2;
+                    for (let i = this.bluePotStartIndex + 1; i < this.numPots - 1; ++i) {
+                        theirStones += state[i];
+                    }
+                    theirStones += (state[this.bluePotEndIndex - 1] + state[this.bluePotStartIndex]) * 2;
+                    myScore = (state[this.redRightScoreIndex] + state[this.redLeftScoreIndex]) * 4;
+                    theirScore = (state[this.blueRightScoreIndex] + state[this.blueLeftScoreIndex]) * 4;
+                    return (myScore - theirScore) + (myStones - theirStones);
                 } else {
-                    myScore = state[this.blueRightScoreIndex] + state[this.blueLeftScoreIndex];
-
+                    for (let i = this.redPotStartIndex + 1; i < this.numPots - 1; ++i) {
+                        theirStones += state[i];
+                    }
+                    theirStones += (state[this.redPotEndIndex - 1] + state[this.redPotStartIndex]) * 2;
+                    for (let i = this.bluePotStartIndex + 1; i < this.numPots - 1; ++i) {
+                        myStones += state[i];
+                    }
+                    myStones += (state[this.bluePotStartIndex] + state[this.redPotEndIndex - 1]) * 2;
+                    myScore = (state[this.blueRightScoreIndex] + state[this.blueLeftScoreIndex]) * 4;
+                    theirScore = (state[this.redRightScoreIndex] + state[this.redLeftScoreIndex]) * 4;
+                    return (myScore - theirScore) + (myStones - theirStones);
                 }
-            }
-
-            startAiPlayers() {
-                console.log("Let the AI battle begin!")
             }
 
             bluePots() {
@@ -298,7 +330,7 @@ angular.module('mancalagamefactory', [])
 
             printDebug() {
                 this.conl(this.playersPlaying);
-                console.log(this.currentState)
+                console.log(this.currentState);
                 console.log("bstart: " + this.bluePotStartIndex + " bend: " + this.bluePotEndIndex +
                     "rstart: " + this.redPotStartIndex + " rend: " + this.redPotEndIndex);
             }

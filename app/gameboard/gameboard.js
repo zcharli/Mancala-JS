@@ -2,7 +2,6 @@
 
 angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap'])
     .config(['$routeProvider', function ($routeProvider, $popover) {
-        console.log("route load")
         $routeProvider.when('/gameboard', {
             templateUrl: 'gameboard/gameboard.html',
             controller: 'MancalaBoardCtrl'
@@ -10,7 +9,7 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap'])
         console.log($popover)
     }])
 
-    .controller('MancalaBoardCtrl', ['$scope','$compile', 'MancalaGameFactory', function ( $scope, $compile, MancalaGameFactory) {
+    .controller('MancalaBoardCtrl', ['$scope', '$timeout', 'MancalaGameFactory', function ($scope, $timeout, MancalaGameFactory) {
         //console.log($compile);
         $scope.gameSettings = {
             numberOfStones: 2,
@@ -29,11 +28,11 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap'])
         $scope.redPotArray = [];
 
         $scope.gameBoardEvents = {
-            gameStonesChanged: function () {
-                console.log("Rebuilding board")
-                if ($scope.gameSettings.mancalaPots >= 2*($scope.gameSettings.numberOfStones-1) &&
+            newGame: function () {
+                console.log("Rebuilding board");
+                if ($scope.gameSettings.mancalaPots >= 2 * ($scope.gameSettings.numberOfStones - 1) &&
                     $scope.gameSettings.mancalaPots - 1 > 2) {
-                    console.log("deduct pots")
+                    console.log("deduct pots");
                     $scope.gameSettings.mancalaPots -= 1;
                 } else if ($scope.gameSettings.mancalaPots < $scope.gameSettings.numberOfStones - 1) {
                     $scope.gameSettings.mancalaPots += 1;
@@ -44,24 +43,67 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap'])
                         $scope.gameSettings.mancalaPots,
                         $scope.gameSettings.players);
                 $scope.mancalaGame = mancalaGame;
-            },
-            gameStartNew: function () {
-                console.log("Rebuilding board")
-                mancalaGame = MancalaGameFactory
-                    .newGame($scope.gameSettings.numberOfStones,
-                        $scope.gameSettings.mancalaPots,
-                        $scope.gameSettings.players);
-                $scope.mancalaGame = mancalaGame;
-                $scope.getGameUIStates.playerTurn = mancalaGame.getPlayerTurn();
-            },
+                $scope.getGameUIStates.playerTurn = $scope.mancalaGame.getPlayerTurn();
+                if ($scope.gameSettings.players != 2) {
+                    // Timer to set up both players to play
+                    $scope.determineAiMoves();
+                }
+            }
         };
 
-        $scope.gamePotStates = {
-            getMoveOptions: function(index) {
-                return $compile("<button class='move-choice btn' data-ng-click='cellClicked(0, "+index+",0)'>&larr;</button>"+
-                       "<button class='move-choice btn' data-ng-click='cellClicked(0, "+index+",1)' >&rarr;</button>")($scope);
+        $scope.determineAiMoves = function () {
+            console.log("Moving AI");
+            let playerTurn = $scope.mancalaGame.getPlayerTurn();
+            let playerNum = $scope.mancalaGame.numPlayers;
+            if (playerNum == 1) {
+                if (playerTurn == 0) {
+                    $scope.moveString = $timeout($scope.moveAiPlayer, 0, true, 0);
+                }
+            } else if (playerNum === 0) {
+                $scope.moveString = $timeout($scope.moveAiPlayer, 0, true, playerNum).then(() => {
+                    if ($scope.checkWinner() != -1) {
+                        $scope.determineAiMoves();
+                    }
+                });
             }
-        }
+        };
+
+        $scope.moveAiPlayer = function (player) {
+
+            if (mancalaGame.computeAiMove(player)) {
+                $scope.getGameUIStates.blueMancalaHoles();
+                $scope.getGameUIStates.redMancalaHoles();
+                $scope.getGameUIStates.playerTurn = mancalaGame.getPlayerTurn();
+                console.log("Blue finished made a move now its turn: " + mancalaGame.getPlayerTurn());
+            }
+            let lastMove = $scope.mancalaGame.lastMove;
+            let playerTurn = $scope.getGameUIStates.playerTurn;
+            let playerNum = $scope.gameSettings.players;
+            let moveString = "The AI player ";
+            if (player === 0) {
+                moveString += "Blue, ";
+            } else {
+                moveString += "Red, ";
+            }
+            moveString += "has made a move on his pot " + lastMove.move + " in ";
+            if (lastMove.direction === 0) {
+                moveString += "the left direction.";
+            } else {
+                moveString += "the right direction.";
+            }
+
+            if ($scope.checkWinner() == -1) {
+                if (playerNum == 0) {
+                    $scope.determineAiMoves();
+                } else if (playerNum == 1) {
+                    if (playerTurn == 0) {
+                        $scope.determineAiMoves();
+                    }
+                }
+            }
+
+            return moveString;
+        };
 
         $scope.getGameUIStates = {
             blueMancalaHoles: function () {
@@ -84,24 +126,54 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap'])
             blueRightScorePot: function () {
                 return $scope.mancalaGame.blueRightScore;
             },
-            redLeftScorePot: function() {
+            redLeftScorePot: function () {
                 return $scope.mancalaGame.redLeftScore;
             },
-            redRightScorePot: function() {
+            redRightScorePot: function () {
                 return $scope.mancalaGame.redRightScore;
             },
             playerTurn: $scope.mancalaGame.getPlayerTurn()
-        }
+        };
+
+        $scope.checkWinner = function() {
+            if ($scope.mancalaGame.gameOver) {
+                console.log("Game over");
+                if($scope.mancalaGame.winner === 0) {
+                    console.log("Winner is blue");
+                    return 0;
+                } else {
+                    console.log("Winner is red!");
+                    return 1;
+                }
+            }
+            return -1;
+        };
 
         $scope.cellClicked = function (player, cellNumber, direction) {
-
+            console.log("Cell clicked");
+            let numPlayers = $scope.gameSettings.players;
+            let playerTurn = $scope.mancalaGame.getPlayerTurn();
             if (player != $scope.getGameUIStates.playerTurn) return;
-            //console.log(mancalaGame.getPlayerTurn());
-            if(mancalaGame.makeMove(player, cellNumber, direction)) {
-                $scope.getGameUIStates.blueMancalaHoles();
-                $scope.getGameUIStates.redMancalaHoles();
-                $scope.getGameUIStates.playerTurn = mancalaGame.getPlayerTurn();
+            console.log(numPlayers);
+            if (numPlayers == 1) {
+                if (playerTurn == 1) {
+                    if (mancalaGame.makeMove(player, cellNumber, direction)) {
+                        $scope.getGameUIStates.blueMancalaHoles();
+                        $scope.getGameUIStates.redMancalaHoles();
+                        $scope.getGameUIStates.playerTurn = mancalaGame.getPlayerTurn();
+                        if ($scope.getGameUIStates.playerTurn == 0) {
+                            $scope.determineAiMoves();
+                        }
+                    }
+                }
+            } else if (numPlayers == 2) {
+                if (mancalaGame.makeMove(player, cellNumber, direction)) {
+                    $scope.getGameUIStates.blueMancalaHoles();
+                    $scope.getGameUIStates.redMancalaHoles();
+                    $scope.getGameUIStates.playerTurn = mancalaGame.getPlayerTurn();
+                }
             }
+            $scope.checkWinner();
+        };
 
-        }
     }]);

@@ -6,11 +6,11 @@
         <div class="col s12 l6 m6">
             <label for="nstones">Enter Number of stones:</label>
             <div class="input-field">
-                <input id="nstones" type="number" min="2" max="6" data-ng-change="gameBoardEvents.gameStonesChanged()" data-ng-model="gameSettings.numberOfStones">
+                <input id="nstones" type="number" min="2" max="6" data-ng-change="gameBoardEvents.newGame()" data-ng-model="gameSettings.numberOfStones">
             </div>
             <label for="npots">Coloured holes:</label>
             <div class="input-field">
-                <input id="npots" type="number" data-ng-change="gameBoardEvents.gameStartNew()"
+                <input id="npots" type="number" data-ng-change="gameBoardEvents.newGame()"
                        min="2" max="{{2*(gameSettings.numberOfStones-1)}}"
                        data-ng-model="gameSettings.mancalaPots">
             </div>
@@ -19,21 +19,25 @@
 
         <div class="col s12 l6 m6">
             <div class="row">
-                <input type="radio" id="2p" data-ng-change="gameBoardEvents.gameStartNew()"
+                <input type="radio" id="2p" data-ng-change="gameBoardEvents.newGame()"
                        data-ng-model="gameSettings.players" value="2">
                 <label for="2p">Two Player (Red goes first)</label>
             </div>
             <div class="row">
-                <input id="1p" type="radio" data-ng-change="gameBoardEvents.gameStartNew()"
+                <input id="1p" type="radio" data-ng-change="gameBoardEvents.newGame()"
                            data-ng-model="gameSettings.players" value="1">
                 <label for="1p">One Player vs Computer (you are red)</label>
             </div>
             <div class="row">
-                <input id="2c" type="radio" data-ng-change="gameBoardEvents.gameStartNew()"
+                <input id="2c" type="radio" data-ng-change="gameBoardEvents.newGame()"
                        data-ng-model="gameSettings.players" value="0">
                 <label for="2c">Two Computers</label>
             </div>
         </div>
+    </div>
+
+    <div class="row">
+        {{moveString || "Waiting for player to make move..."}}
     </div>
 
     <table id='mancala-board'>
