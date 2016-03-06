@@ -18,7 +18,15 @@ app.directive('toolTip', function() {
 app.directive('movePopover', ["$popover", "$compile","$timeout", function($popover, $compile, $timeout){
     return {
         restrict: "EAC",
-        template: "<div class='pop-over-move circle blue-fill'> {{ballsInHole}}</div>",
+        template: function(element, attrs) {
+            console.log(attrs)
+            var attributes = attrs["movePopover"].split(" ");
+            if(attributes[3] == "blue") {
+                return "<div class='pop-over-move circle blue-fill'> {{ballsInHole}}</div>"
+            } else {
+                return "<div class='pop-over-move circle red-fill'> {{ballsInHole}}</div>"
+            }
+        },
         link: function(scope, element, attrs) {
             //console.log(scope.getGameUIStates.playerTurn)
             var index = attrs["movePopover"].split(" ");

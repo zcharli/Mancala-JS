@@ -14,7 +14,7 @@ angular.module('mancalagamefactory', [])
          */
         class MancalaGameLogic {
             constructor(stones, pots, players) {
-                const MAX_DEPTH = 5;
+                const MAX_DEPTH = 3;
                 this.numStones = stones, this.numPots = pots, this.numPlayers = players,
                 this.playersPlaying = [];
                 // Important Indexes
@@ -47,7 +47,7 @@ angular.module('mancalagamefactory', [])
                 }
                 if (this.numPlayers == 1) {
                     this.conl(this);
-                    this.blueBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(this.currentState, MAX_DEPTH, 0, this);
+                    this.blueBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(this.currentState, MAX_DEPTH, 0, this, this.heuristicOne);
 
                     this.startVersusAi();
                 }
@@ -230,6 +230,42 @@ angular.module('mancalagamefactory', [])
                 if(this.getPlayerTurn() == 1) return; // Not my turn
                 let bestMove = this.blueBot.findBestMove(this.currentState);
                 console.log(bestMove);
+            }
+
+            heuristicOne(state, player) {
+                let myStones = 0, theirStones = 0;
+                if(player === 1) {
+                    for(let i = this.redPotStartIndex; i < this.numPots; ++i) {
+                        myStones += state[i];
+                    }
+                    for(let i = this.bluePotStartIndex; i < this.numPots; ++i) {
+                        theirStones += state[i];
+                    }
+                    return ((state[this.redRightScoreIndex] + state[this.redLeftScoreIndex]) -
+                            (state[this.blueLeftScoreIndex] + state[this.blueRightScoreIndex])) +
+                            (myStones - theirStones);
+                } else {
+                    for(let i = this.bluePotStartIndex; i < this.numPots; ++i) {
+                        myStones += state[i];
+                    }
+                    for(let i = this.redPotStartIndex; i < this.numPots; ++i) {
+                        theirStones += state[i];
+                    }
+                    return ((state[this.blueLeftScoreIndex] + state[this.blueRightScoreIndex]) -
+                        (state[this.redRightScoreIndex] + state[this.redLeftScoreIndex])) +
+                        (myStones - theirStones);
+                }
+            }
+
+            heuristicTwo(state, player) {
+                let myScore = 0;
+                if(player === 1) {
+                    myScore = state[this.redRightScoreIndex] + state[this.redLeftScoreIndex];
+
+                } else {
+                    myScore = state[this.blueRightScoreIndex] + state[this.blueLeftScoreIndex];
+
+                }
             }
 
             startAiPlayers() {

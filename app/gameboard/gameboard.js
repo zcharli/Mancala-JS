@@ -13,8 +13,8 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap'])
     .controller('MancalaBoardCtrl', ['$scope','$compile', 'MancalaGameFactory', function ( $scope, $compile, MancalaGameFactory) {
         //console.log($compile);
         $scope.gameSettings = {
-            numberOfStones: 4,
-            mancalaPots: 5,
+            numberOfStones: 2,
+            mancalaPots: 2,
             players: 2
         };
 
