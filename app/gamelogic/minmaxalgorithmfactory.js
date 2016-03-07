@@ -12,14 +12,16 @@ angular.module('minmaxalgorithmfactory', [])
          *  1 - min layer
          */
         class MinMaxNode {
-            constructor(state, depth, parent, heuristic, minMaxLayer, anotherMove, termNode) {
+            constructor(state, depth, parent, heuristic, minMaxLayer, termNode,
+                        direction, move) {
                 this.state = state;
                 this.depth = depth;
                 //this.hash = this.getHashCode();
+                this.direction = direction;
+                this.move = move;
                 this.parent = parent;
                 this.heuristicValue = heuristic;
                 this.minMaxLayer = minMaxLayer;
-                this.chainMoves = anotherMove;
                 this.isTerminalNode = termNode;
             }
 
@@ -69,21 +71,26 @@ angular.module('minmaxalgorithmfactory', [])
                 if (startPot >= this.redPotStartIndex) {
                     // Loop increasing on red pots, then wrap
                     while (stonesInHand != 0) {
-                        if (nextPot >= state.length) {
-                            // Time to wrap around to blue pots and loop decreasing
-                            nextPot = this.blueRightScoreIndex;
+                        if (nextPot >= state.length && direction == 1) {
+                            nextPot = this.bluePotEndIndex;
                             nextMove = x => nextPot--;
-                        } else if (nextPot === -1) {
-                            // Wrapped around on the other side, going back to red
+                        } else if (nextPot < this.bluePotStartIndex && direction == 1) {
                             nextPot = this.redLeftScoreIndex;
+                            nextPot = x => nextPot++;
+                        } else if (nextPot == this.blueRightScoreIndex && direction == 0) {
+                            nextPot = this.bluePotStartIndex;
                             nextMove = x => nextPot++;
-                        }
-                        if (player === 0 && (nextPot === this.redLeftScoreIndex
-                            || nextPot === this.redRightScoreIndex)) {
-                            nextMove();
+                        } else if (nextPot + 1 == this.blueRightScoreIndex && direction == 0) {
+                            state[nextMove()] += 1;
+                            --stonesInHand;
+                            nextPot = this.redRightScoreIndex;
+                            nextMove = x => nextPot--;
                             continue;
                         }
-                        else if (player == 1 && (nextPot === this.blueLeftScoreIndex
+                        if (player === 0){
+                            console.log("Something bad happened to red's side...");
+                        }
+                        if (player == 1 && (nextPot === this.blueLeftScoreIndex
                             || nextPot === this.blueRightScoreIndex)) {
                             nextMove();
                             continue;
@@ -95,29 +102,35 @@ angular.module('minmaxalgorithmfactory', [])
                 } else {
                     // Loop decreasing on blue pots, then wrap
                     while (stonesInHand != 0) {
-                        if (nextPot < 0) {
+                        if (nextPot < 0 && direction == 0) {
                             // Time to wrap around red and loop increasing
-                            nextPot = this.redLeftScoreIndex;
+                            nextPot = this.redPotStartIndex;
                             nextMove = x => nextPot++;
-                        } else if (nextPot === state.length) {
+                        } else if (nextPot === this.redRightScoreIndex && direction == 0) {
                             // Wrapped around twice, going back to blue
                             nextPot = this.blueRightScoreIndex;
                             nextMove = x => nextPot--;
+                        } else if (nextPot == this.redLeftScoreIndex && direction == 1) {
+                            nextPot = this.redPotEndIndex;
+                            nextMove = x => nextPot--;
+                        } else if (nextPot - 1 == this.redLeftScoreIndex && direction == 1) {
+                            state[nextMove()] += 1;
+                            --stonesInHand;
+                            nextPot = this.blueLeftScoreIndex;
+                            nextMove = x => nextPot++;
+                            continue;
                         }
                         if (player === 0 && (nextPot === this.redLeftScoreIndex
                             || nextPot === this.redRightScoreIndex)) {
                             nextMove();
                             continue;
                         }
-                        else if (player == 1 && (nextPot === this.blueLeftScoreIndex
-                            || nextPot === this.blueRightScoreIndex)) {
-                            nextMove();
-                            continue;
+                        if (player == 1){
+                            console.log("Something bad happened on the blue side.")
                         }
                         state[nextMove()] += 1;
                         --stonesInHand;
                     }
-
                 }
                 // Check if the last pot is a home pot
                 finalMove = nextPot;
@@ -127,6 +140,7 @@ angular.module('minmaxalgorithmfactory', [])
             }
 
             updateScore(index, player, cellNumber, state) {
+
                 let closestPot = 0, scoreTaken = 0;
                 if (player === 0) {
                     // Taking from red
@@ -150,19 +164,13 @@ angular.module('minmaxalgorithmfactory', [])
 
             generateNode(cellNumber, direction, node, lastMinMaxLayer, player) {
                 let copiedState = null, state = node.state, thisMinMaxLayer = !lastMinMaxLayer,
-                    anotherMove = false, terminalNode = true, heuristicValue = 0;
+                    terminalNode = true, heuristicValue = 0;
                 let modelCellMove = player === 0 ? this.bluePotStartIndex + cellNumber
                     : this.redPotStartIndex + cellNumber;
                 //console.log(state)
                 if (state[modelCellMove] === 0) return false; // Not a true move
 
                 copiedState = angular.copy(state, copiedState);
-
-                // Sets another maximizing layer
-                if (node.chainMoves) {
-                    thisMinMaxLayer = lastMinMaxLayer;
-                    //heuristicValue += 1;
-                }
 
                 // Make the play
                 let lastStonePlacement = this.calculateMoveState(modelCellMove, copiedState[modelCellMove],
@@ -184,12 +192,12 @@ angular.module('minmaxalgorithmfactory', [])
                 // Check either player if they can play again
                 if (player === 0 && (lastStonePlacement === this.blueLeftScoreIndex
                     || lastStonePlacement === this.blueRightScoreIndex)) {
-                    anotherMove = true;
+                    thisMinMaxLayer = lastMinMaxLayer;
                     //heuristicValue += 1;
                 }
                 if (player === 1 && (lastStonePlacement === this.redLeftScoreIndex
                     || lastStonePlacement === this.redRightScoreIndex)) {
-                    anotherMove = true;
+                    thisMinMaxLayer = lastMinMaxLayer;
                     //heuristicValue += 1;
                 }
 
@@ -207,16 +215,8 @@ angular.module('minmaxalgorithmfactory', [])
                 }
                 //console.log(copiedState)
                 heuristicValue += this.heuristic.call(this, copiedState, player);
-                return new MinMaxNode(copiedState, node.depth + 1, node, heuristicValue, thisMinMaxLayer, anotherMove, terminalNode);
-            };
-
-            getHeuristicValue(state, player) {
-                if (player == 0) {
-                    // Blue
-                    return state[this.blueLeftScoreIndex] + state[this.blueRightScoreIndex];
-                } else {
-                    return state[this.redLeftScoreIndex] + state[this.redRightScoreIndex];
-                }
+                return new MinMaxNode(copiedState, node.depth + 1, node, heuristicValue, thisMinMaxLayer,
+                    terminalNode, direction, cellNumber);
             };
 
             produce(node, minMax, player) {
@@ -228,7 +228,7 @@ angular.module('minmaxalgorithmfactory', [])
                     if (!newNode) continue;
                     newMoveStates.push({node: newNode, direction: 0, move: i});
                     // Generate move for right
-                    newNode = this.generateNode(i, 0, node, minMax, player);
+                    newNode = this.generateNode(i, 1, node, minMax, player);
                     newMoveStates.push({node: newNode, direction: 1, move: i});
                 }
                 console.log(newMoveStates);
@@ -260,8 +260,11 @@ angular.module('minmaxalgorithmfactory', [])
                     let bestValue = {node: {heuristicValue: Number.NEGATIVE_INFINITY}};
                     for (let child of this.prodSystem.produce(moveState.node, maximizingPlayer, this.player)) {
                         let curMoveState = this.miniMax(child, depth - 1, child.node.minMaxLayer);
-                        bestValue = bestValue.node.heuristicValue >= curMoveState.node.heuristicValue ?
-                            bestValue : curMoveState;
+                        if(bestValue.node.heuristicValue < curMoveState.node.heuristicValue) {
+                            bestValue.move = child.move;
+                            bestValue.direction = child.direction;
+                            bestValue.node = child.node;
+                        }
                     }
                     //console.log("maximizing best value: " + bestValue.node.heuristicValue +
                     //    " with move " + bestValue.move + " with direction " + bestValue.direction);
@@ -269,9 +272,12 @@ angular.module('minmaxalgorithmfactory', [])
                 } else {
                     let bestValue = {node: {heuristicValue: Number.POSITIVE_INFINITY}};
                     for (let child of this.prodSystem.produce(moveState.node, maximizingPlayer, Math.abs(this.player - 1))) {
-                        let curMoveState = this.miniMax(child, depth - 1, child.node.minMaxLayer);
-                        bestValue = bestValue.node.heuristicValue <= curMoveState.node.heuristicValue ?
-                            bestValue : curMoveState;
+                        let curMoveState = this.miniMax(child, depth - 1, !child.node.minMaxLayer);
+                        if(bestValue.node.heuristicValue > curMoveState.node.heuristicValue ) {
+                            bestValue.move = child.move;
+                            bestValue.direction = child.direction;
+                            bestValue.node = child.node;
+                        }
                     }
                     //console.log("minimizing best value: " + bestValue.node.heuristicValue +
                     //    " with move " + bestValue.move + " with direction " + bestValue.direction);

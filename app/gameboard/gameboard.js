@@ -17,6 +17,9 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap'])
             players: 2
         };
 
+        $scope.moveString = "";
+        $scope.gamePlaying = "Playing...";
+
         let mancalaGame = MancalaGameFactory
             .newGame($scope.gameSettings.numberOfStones,
                 $scope.gameSettings.mancalaPots,
@@ -92,7 +95,8 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap'])
                 moveString += "the right direction.";
             }
 
-            if ($scope.checkWinner() == -1) {
+            let winner = $scope.checkWinner();
+            if (winner == -1) {
                 if (playerNum == 0) {
                     $scope.determineAiMoves();
                 } else if (playerNum == 1) {
@@ -138,12 +142,18 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap'])
         $scope.checkWinner = function() {
             if ($scope.mancalaGame.gameOver) {
                 console.log("Game over");
-                if($scope.mancalaGame.winner === 0) {
+                let blueScore = $scope.mancalaGame.blueScoreTotalEndScore;
+                let redScore = $scope.mancalaGame.redScoreTotalEndScore;
+                console.log("The final score is red: " + redScore + " and blue: "+blueScore);
+                if (redScore < blueScore) {
                     console.log("Winner is blue");
                     return 0;
-                } else {
+                } else if (redScore > blueScore) {
                     console.log("Winner is red!");
                     return 1;
+                } else {
+                    console.log("Both players tied!")
+                    return 2;
                 }
             }
             return -1;

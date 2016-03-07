@@ -39,7 +39,11 @@
     <div class="row">
         {{moveString || "Waiting for player to make move..."}}
     </div>
+    <div class="row">
+        <div class="col s6">{{gamePlaying}}</div>
+        <div class="col s6"><button class="btn waves-light" ng-click="gameBoardEvents.newGame()">Restart</button></div>
 
+    </div>
     <table id='mancala-board'>
         <tr class="mancala-board_row" ng-class="{0: 'my-turn', 1: 'not-my-turn'}[getGameUIStates.playerTurn]" id="mancala-board_blue-player">
 
