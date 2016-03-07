@@ -1,7 +1,7 @@
 <h1 style="font-weight: bold">Mancala!</h1>
 
 
-<div>
+<div class="container">
     <div class="row">
         <div class="col s12 l6 m6">
             <label for="nstones">Enter Number of stones:</label>
@@ -14,7 +14,8 @@
                        min="2" max="{{2*(gameSettings.numberOfStones-1)}}"
                        data-ng-model="gameSettings.mancalaPots">
             </div>
-            Playing with {{gameSettings.numberOfStones}} stones with {{gameSettings.mancalaPots}} pots.
+            <div class="row">Playing with {{gameSettings.numberOfStones}} stones with {{gameSettings.mancalaPots}} pots.</div>
+
         </div>
 
         <div class="col s12 l6 m6">
@@ -33,44 +34,51 @@
                        data-ng-model="gameSettings.players" value="0">
                 <label for="2c">Two Computers</label>
             </div>
+            <div class="row">
+                <label for="maxdepth">Max Depth:</label>
+                <div class="input-field">
+                    <input id="maxdepth" type="number" data-ng-change="gameBoardEvents.newGame()"
+                           min="1" max="20"
+                           data-ng-model="gameSettings.maxDepth">
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="row">
-        {{moveString || "Waiting for player to make move..."}}
-    </div>
     <div class="row">
         <div class="col s6">{{gamePlaying}}</div>
         <div class="col s6"><button class="btn waves-light" ng-click="gameBoardEvents.newGame()">Restart</button></div>
 
     </div>
-    <table id='mancala-board'>
-        <tr class="mancala-board_row" ng-class="{0: 'my-turn', 1: 'not-my-turn'}[getGameUIStates.playerTurn]" id="mancala-board_blue-player">
-
-            <td class="mancala-board_cell mancala-board_score-cell"><div class="circle blue-border">{{getGameUIStates.blueLeftScorePot()}}</div></td>
-            <td ng-repeat="ballsInHole in getGameUIStates.blueMancalaHoles() track by $index"
-                class="mancala-board_cell">
-                <div move-popover="{{$index}} top 0 blue">
-                </div>
-            </td>
-            <td ng-repeat-end class="mancala-board_cell mancala-board_score-cell"><div class="circle blue-border">{{getGameUIStates.blueRightScorePot()}}</div></td>
-        </tr>
-
-        <tr class="mancala-board-row" ng-class="{1: 'my-turn', 0: 'not-my-turn'}[getGameUIStates.playerTurn]"  id="mancala-board_red-player">
-            <td class="mancala-board_cell mancala-board_score-cell"><div class="circle red-border">{{getGameUIStates.redLeftScorePot()}}</div></td>
-            <td ng-repeat="ballsInHole in getGameUIStates.redMancalaHoles() track by $index"
-                class="mancala-board_cell">
-                <div move-popover="{{$index}} bottom 1 red">
-                </div>
-            </td>
-            <td ng-repeat-end class="mancala-board_cell mancala-board_score-cell"><div class="circle red-border">{{getGameUIStates.redRightScorePot()}}</div></td>
-        </tr>
-    </table>
 </div>
 
-<script type="text/ng-template" id="direction-selection">
-    <ul>
-        <li>hi</li>
-        <!--<li ng-repeat="item in items"><a>{{item.name}}</a></li>-->
-    </ul>
-</script>
+<table id='mancala-board'>
+    <tr class="mancala-board_row" ng-class="{0: 'my-turn', 1: 'not-my-turn'}[getGameUIStates.playerTurn]" id="mancala-board_blue-player">
+
+        <td class="mancala-board_cell mancala-board_score-cell"><div class="circle blue-border">{{getGameUIStates.blueLeftScorePot()}}</div></td>
+        <td ng-repeat="ballsInHole in getGameUIStates.blueMancalaHoles() track by $index"
+            class="mancala-board_cell">
+            <div move-popover="{{$index}} top 0 blue">
+            </div>
+        </td>
+        <td ng-repeat-end class="mancala-board_cell mancala-board_score-cell"><div class="circle blue-border">{{getGameUIStates.blueRightScorePot()}}</div></td>
+    </tr>
+
+    <tr class="mancala-board-row" ng-class="{1: 'my-turn', 0: 'not-my-turn'}[getGameUIStates.playerTurn]"  id="mancala-board_red-player">
+        <td class="mancala-board_cell mancala-board_score-cell"><div class="circle red-border">{{getGameUIStates.redLeftScorePot()}}</div></td>
+        <td ng-repeat="ballsInHole in getGameUIStates.redMancalaHoles() track by $index"
+            class="mancala-board_cell">
+            <div move-popover="{{$index}} bottom 1 red">
+            </div>
+        </td>
+        <td ng-repeat-end class="mancala-board_cell mancala-board_score-cell"><div class="circle red-border">{{getGameUIStates.redRightScorePot()}}</div></td>
+    </tr>
+</table>
+<br>
+<div class="container">
+    <div class="row">
+        <div class="col s12">
+            <div ng-bind-html="logBody"></div>
+        </div>
+    </div>
+</div>

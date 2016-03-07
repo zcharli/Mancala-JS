@@ -13,8 +13,8 @@ angular.module('mancalagamefactory', [])
          * [ 6, 7, 8, 9, 10, 11]
          */
         class MancalaGameLogic {
-            constructor(stones, pots, players) {
-                const MAX_DEPTH = 1;
+            constructor(stones, pots, players, depth) {
+                this.maxDepth = depth;
                 this.blueRemainingPotScore = 0, this.redRemainingPotScore = 0;
                 this.numStones = stones;
                 this.numPots = pots;
@@ -42,14 +42,14 @@ angular.module('mancalagamefactory', [])
                 this.printDebug();
                 if (this.numPlayers == 0) {
 
-                    this.blueBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(this.currentState, MAX_DEPTH, 0,
+                    this.blueBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(this.currentState, this.maxDepth, 0,
                         this, this.heuristicTwo);
-                    this.redBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(this.currentState, MAX_DEPTH, 1,
-                        this, this.heuristicOne());
+                    this.redBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(this.currentState, this.maxDepth, 1,
+                        this, this.heuristicOne);
                 }
                 if (this.numPlayers == 1) {
                     this.conl(this);
-                    this.blueBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(this.currentState, MAX_DEPTH, 0,
+                    this.blueBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(this.currentState, this.maxDepth, 0,
                         this, this.heuristicOne);
                 }
                 this.lastMove = {};
@@ -121,15 +121,16 @@ angular.module('mancalagamefactory', [])
              */
             placeStones(startPot, stonesInHand, player, direction) {
                 let nextPot = 0, nextMove = null, finalMove;
-
+                let incrementer = x => nextPot++;
+                let decrementer = x => nextPot--;
                 // determine direction
                 if (direction == 0) {
                     // Go left
-                    nextMove = x => nextPot--;
+                    nextMove = decrementer;
                     nextPot = startPot - 1;
                 } else {
                     // Go right
-                    nextMove = x => nextPot++;
+                    nextMove = incrementer;
                     nextPot = startPot + 1;
                 }
                 // Take the stones out of the start pot
@@ -140,18 +141,18 @@ angular.module('mancalagamefactory', [])
                     while (stonesInHand != 0) {
                         if (nextPot >= this.currentState.length && direction == 1) {
                             nextPot = this.bluePotEndIndex - 1;
-                            nextMove = x => nextPot--;
+                            nextMove = decrementer;
                         } else if (nextPot < this.bluePotStartIndex && direction == 1) {
                             nextPot = this.redLeftScoreIndex;
-                            nextPot = x => nextPot++;
+                            nextMove = incrementer;
                         } else if (nextPot == this.blueRightScoreIndex && direction == 0) {
                             nextPot = this.bluePotStartIndex;
-                            nextMove = x => nextPot++;
+                            nextMove = incrementer;
                         } else if (nextPot + 1 == this.blueRightScoreIndex && direction == 0) {
                             this.currentState[nextMove()] += 1;
                             --stonesInHand;
                             nextPot = this.redRightScoreIndex;
-                            nextMove = x => nextPot--;
+                            nextMove = decrementer;
                             continue;
                         }
                         if (player === 0){
@@ -172,19 +173,19 @@ angular.module('mancalagamefactory', [])
                         if (nextPot < 0 && direction == 0) {
                             // Time to wrap around red and loop increasing
                             nextPot = this.redPotStartIndex;
-                            nextMove = x => nextPot++;
+                            nextMove = incrementer;
                         } else if (nextPot === this.redRightScoreIndex && direction == 0) {
                             // Wrapped around twice, going back to blue
                             nextPot = this.blueRightScoreIndex;
-                            nextMove = x => nextPot--;
+                            nextMove = decrementer;
                         } else if (nextPot == this.redLeftScoreIndex && direction == 1) {
                             nextPot = this.redPotEndIndex - 1;
-                            nextMove = x => nextPot--;
+                            nextMove = decrementer;
                         } else if (nextPot - 1 == this.redLeftScoreIndex && direction == 1) {
                             this.currentState[nextMove()] += 1;
                             --stonesInHand;
                             nextPot = this.blueLeftScoreIndex;
-                            nextMove = x => nextPot++;
+                            nextMove = incrementer;
                             continue;
                         }
                         if (player === 0 && (nextPot === this.redLeftScoreIndex
@@ -370,8 +371,8 @@ angular.module('mancalagamefactory', [])
         }
 
         return {
-            newGame: function (numStones, numPots, numPlayers) {
-                return new MancalaGameLogic(numStones, numPots, numPlayers)
+            newGame: function (numStones, numPots, numPlayers, depth) {
+                return new MancalaGameLogic(numStones, numPots, numPlayers, depth)
             }
         }
     });
