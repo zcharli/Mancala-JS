@@ -21,7 +21,7 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap', 'nv
 
         $scope.moveString = "";
         $scope.gamePlaying = "Playing...";
-
+        $scope.whatChanged = new Array($scope.gameSettings.mancalaPots* 2 + 4);
         let mancalaGame = MancalaGameFactory
             .newGame($scope.gameSettings.numberOfStones,
                 $scope.gameSettings.mancalaPots,
@@ -65,6 +65,7 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap', 'nv
                     // Timer to set up both players to play
                     $scope.determineAiMoves();
                 }
+                $scope.whatChanged = new Array($scope.gameSettings.mancalaPots* 2 + 4);
             }
         };
 
@@ -96,6 +97,7 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap', 'nv
                 $scope.getGameUIStates.redMancalaHoles();
                 $scope.getGameUIStates.playerTurn = mancalaGame.getPlayerTurn();
                 $scope.logMove(player);
+                $scope.getGameUIStates.updatePotsChanged();
             }
             let playerTurn = $scope.getGameUIStates.playerTurn;
             let playerNum = $scope.gameSettings.players;
@@ -144,6 +146,10 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap', 'nv
         };
 
         $scope.getGameUIStates = {
+            updatePotsChanged: function() {
+              let changedArray = $scope.mancalaGame.whatChanged;
+                console.log(changedArray)
+            },
             blueMancalaHoles: function () {
                 //console.log($scope.mancalaGame.bluePots);
                 $scope.bluePotArray.length = 0;
@@ -219,6 +225,7 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap', 'nv
                     $scope.getGameUIStates.playerTurn = mancalaGame.getPlayerTurn();
                 }
             }
+            $scope.getGameUIStates.updatePotsChanged();
             $scope.checkWinner();
         };
 

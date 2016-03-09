@@ -53,6 +53,7 @@ angular.module('mancalagamefactory', [])
                         this, this.heuristicOne);
                 }
                 this.lastMove = {};
+                this.whatChanged = new Array(this.numPots * 2 + 4);
             }
 
             /**
@@ -68,6 +69,8 @@ angular.module('mancalagamefactory', [])
                     : this.redPotStartIndex + cellNumber;
 
                 if (this.currentState[modelCellMove] === 0) return false;
+                this.whatChanged = new Array(this.currentState.length).fill(0);
+                console.log(this.whatChanged)
                 let lastStonePlacement = this.placeStones(modelCellMove, this.currentState[modelCellMove],
                     player, direction);
 
@@ -134,6 +137,7 @@ angular.module('mancalagamefactory', [])
                     nextPot = startPot + 1;
                 }
                 // Take the stones out of the start pot
+                this.whatChanged[startPot] = -this.currentState[startPot];
                 this.currentState[startPot] = 0;
 
                 if (startPot >= this.redPotStartIndex) {
@@ -164,6 +168,7 @@ angular.module('mancalagamefactory', [])
                             continue;
                         }
                         // We switch next move based on the location of the array
+                        this.whatChanged[nextPot] += 1;
                         this.currentState[nextMove()] += 1;
                         --stonesInHand;
                     }
@@ -196,6 +201,7 @@ angular.module('mancalagamefactory', [])
                         if (player == 1){
                             console.log("Something bad happened on the blue side.")
                         }
+                        this.whatChanged[nextPot] += 1;
                         this.currentState[nextMove()] += 1;
                         --stonesInHand;
                     }
@@ -248,16 +254,21 @@ angular.module('mancalagamefactory', [])
                     closestPot = cellNumber > this.numPots / 2 ? this.blueRightScoreIndex
                         : this.blueLeftScoreIndex;
                     let potToTakeFrom = index + this.numPots + 2; // Two score pots in between
+                    this.whatChanged[potToTakeFrom] = -this.currentState[potToTakeFrom];
                     this.currentState[closestPot] += this.currentState[potToTakeFrom];
                     this.currentState[potToTakeFrom] = 0;
+                    this.whatChanged[closestPot] += this.currentState[potToTakeFrom];
+
                 } else {
                     console.log("Red Player made a jackpot move!");
                     // Taking from blue
                     closestPot = cellNumber > this.numPots / 2 ? this.redRightScoreIndex
                         : this.redLeftScoreIndex;
                     let potToTakeFrom = index - this.numPots - 2;
+                    this.whatChanged[potToTakeFrom] = -this.currentState[potToTakeFrom];
                     this.currentState[closestPot] += this.currentState[potToTakeFrom];
                     this.currentState[potToTakeFrom] = 0;
+                    this.whatChanged[closestPot] += this.currentState[potToTakeFrom];
                 }
             }
 
