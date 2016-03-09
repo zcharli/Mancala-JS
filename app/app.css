@@ -52,6 +52,14 @@
 
 }
 
+.mancala-red {
+    color: #ED1E23;
+}
+
+.mancala-blue {
+    color: #3D86C6;
+}
+
 .red-border {
     color: #ED1E23;
     border: 6px solid #ED1E23;

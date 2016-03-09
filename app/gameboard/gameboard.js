@@ -1,48 +1,63 @@
 'use strict';
 
-angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap', 'nvd3'])
+angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.ngStrap', 'nvd3'])
     .config(['$routeProvider', function ($routeProvider, $popover) {
         $routeProvider.when('/gameboard', {
             templateUrl: 'gameboard/gameboard.html',
             controller: 'MancalaBoardCtrl'
         });
-        console.log($popover)
     }])
 
-    .controller('MancalaBoardCtrl', ['$scope', '$timeout', '$sce','MancalaGameFactory', function ($scope, $timeout, $sce, MancalaGameFactory) {
+    .controller('MancalaBoardCtrl', ['$scope', '$timeout', '$tooltip','MancalaGameFactory', function ($scope, $timeout, $tooltip, MancalaGameFactory) {
         //console.log($compile);
         $scope.gameSettings = {
-            numberOfStones: 3,
-            mancalaPots: 3,
+            numberOfStones: 4,
+            mancalaPots: 5,
             players: 2,
             maxDepth: 8,
-            showHeuristic: false
+            showHeuristic: false,
+            gameOver: false,
+            heuristicPairing: {
+                redPlayer: "1",
+                bluePlayer: "2"
+            }
         };
 
         $scope.moveString = "";
         $scope.gamePlaying = "Playing...";
+        $scope.winnerMessage = "";
+        $scope.blueScore = "";
+        $scope.redScore = "";
 
         let mancalaGame = MancalaGameFactory
             .newGame($scope.gameSettings.numberOfStones,
                 $scope.gameSettings.mancalaPots,
-                $scope.gameSettings.players);
+                $scope.gameSettings.players,
+                $scope.gameSettings.heuristicPairing);
 
         // Set up game variables
         $scope.mancalaGame = mancalaGame;
         $scope.bluePotArray = [];
         $scope.redPotArray = [];
-        //$scope.logBody = "";
+        $scope.playerName = "";
         $scope.movesMadeByInGame = 0;
         $scope.gameBoardEvents = {
             newGame: function () {
-                let heuristicPairing = {};
                 if($scope.gameSettings.players == 0) {
                     $scope.gameSettings.showHeuristic = true;
                 } else {
                     $scope.gameSettings.showHeuristic = false;
                 }
+
+                $scope.gameSettings.gameOver = false;
                 $scope.movesMadeByInGame = 0;
                 $scope.nvd3Data = [];
+                $scope.moveString = "";
+                $scope.gamePlaying = "Playing...";
+                $scope.winnerMessage = "";
+                $scope.blueScore = "";
+                $scope.redScore = "";
+
                 //$scope.logBody = ""
                 //$scope.logBody = $sce.trustAsHtml("Rebuilding board<br>");
                 console.log("Rebuilding board");
@@ -58,13 +73,19 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap', 'nv
                     .newGame($scope.gameSettings.numberOfStones,
                         $scope.gameSettings.mancalaPots,
                         $scope.gameSettings.players,
-                        $scope.gameSettings.maxDepth);
+                        $scope.gameSettings.maxDepth,
+                        $scope.gameSettings.heuristicPairing);
                 $scope.mancalaGame = mancalaGame;
                 $scope.getGameUIStates.playerTurn = $scope.mancalaGame.getPlayerTurn();
-                if ($scope.gameSettings.players != 2) {
+                if ($scope.gameSettings.players == 1) {
                     // Timer to set up both players to play
                     $scope.determineAiMoves();
                 }
+                $scope.getGameUIStates.printPlayerTurn();
+                //let element = angular.element.find("#rs-r");
+                //console.log(element);
+                //let myTooltip = $tooltip(element, {title: 'My Title'});
+                //myTooltip.show();
             }
         };
 
@@ -75,17 +96,11 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap', 'nv
             if (playerNum == 1) {
                 if (playerTurn == 0) {
                     $scope.moveString = $timeout($scope.moveAiPlayer, 0, true, 0).then(() => {
-
+                        $scope.checkWinner();
                     });
                 }
-            } else if (playerNum === 0) {
-                $scope.moveString = $timeout($scope.moveAiPlayer, 0, true, playerNum).then(() => {
-                    if ($scope.checkWinner() != -1) {
-                        $scope.determineAiMoves().then(() => {
-
-                        });
-                    }
-                });
+            } else if (playerNum == 0) {
+                $scope.moveAiPlayer(playerTurn);
             }
         };
 
@@ -101,22 +116,19 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap', 'nv
             let playerNum = $scope.gameSettings.players;
             let winner = $scope.checkWinner();
             if (winner == -1) {
-                if (playerNum == 0) {
-                    $scope.determineAiMoves();
-                } else if (playerNum == 1) {
+                if (playerNum == 1) {
                     if (playerTurn == 0) {
                         $scope.determineAiMoves();
                     }
                 }
             }
+            $scope.getGameUIStates.printPlayerTurn();
             return true;
         };
 
         $scope.logMove = function(player, real) {
             let lastMove = $scope.mancalaGame.lastMove;
-            let playerTurn = $scope.getGameUIStates.playerTurn;
             let playerNum = $scope.gameSettings.players;
-            lastMove.playerTurn = playerTurn;
             lastMove.playerNum = playerNum;
             lastMove.movesMade = ++$scope.movesMadeByInGame;
             let moveString = "";
@@ -140,7 +152,6 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap', 'nv
             moveString += "<br>while generating " + lastMove.nodeCount + " nodes.";
             lastMove.moveString = moveString;
             $scope.createNVD3Data(lastMove);
-            //$scope.logBody += $sce.trustAsHtml(moveString);
         };
 
         $scope.getGameUIStates = {
@@ -170,6 +181,28 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap', 'nv
             redRightScorePot: function () {
                 return $scope.mancalaGame.redRightScore;
             },
+            printPlayerTurn: function() {
+                let playerTurn = $scope.mancalaGame.getPlayerTurn();
+                if(playerTurn == 0) {
+                    $scope.playerName = "Blue";
+                } else {
+                    $scope.playerName = "Red";
+                }
+            },
+            makeAIMove: function() {
+                $scope.determineAiMoves();
+            },
+            isRedTurn: function() {
+              if($scope.mancalaGame.getPlayerTurn() == 1) {
+                  return true;
+              } else {
+                  return false;
+              }
+            },
+            cellChanged: function(index , player) {
+                //console.log(index)
+                return $scope.movesMadeByInGame;
+            },
             playerTurn: $scope.mancalaGame.getPlayerTurn()
         };
 
@@ -179,14 +212,20 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap', 'nv
                 let blueScore = $scope.mancalaGame.blueScoreTotalEndScore;
                 let redScore = $scope.mancalaGame.redScoreTotalEndScore;
                 console.log("The final score is red: " + redScore + " and blue: "+blueScore);
+                $scope.blueScore = blueScore;
+                $scope.redScore = redScore;
+                $scope.gameSettings.gameOver = true;
                 if (redScore < blueScore) {
                     console.log("Winner is blue");
+                    $scope.winnerMessage = "Winner is blue!";
                     return 0;
                 } else if (redScore > blueScore) {
                     console.log("Winner is red!");
+                    $scope.winnerMessage = "Winner is red!";
                     return 1;
                 } else {
-                    console.log("Both players tied!")
+                    console.log("Both players tied!");
+                    $scope.winnerMessage = "Both players tied!";
                     return 2;
                 }
             }
@@ -198,7 +237,7 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap', 'nv
             let numPlayers = $scope.gameSettings.players;
             let playerTurn = $scope.mancalaGame.getPlayerTurn();
             if (player != $scope.getGameUIStates.playerTurn) return;
-            //console.log(numPlayers);
+            $scope.movesMadeByInGame++;
             if (numPlayers == 1) {
                 if (playerTurn == 1) {
                     if (mancalaGame.makeMove(player, cellNumber, direction)) {
@@ -207,6 +246,7 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap', 'nv
                         $scope.getGameUIStates.redMancalaHoles();
                         $scope.getGameUIStates.playerTurn = mancalaGame.getPlayerTurn();
                         if ($scope.getGameUIStates.playerTurn == 0) {
+                            $scope.getGameUIStates.printPlayerTurn();
                             $scope.determineAiMoves();
                         }
                     }
@@ -220,12 +260,13 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap', 'nv
                 }
             }
             $scope.checkWinner();
+            $scope.getGameUIStates.printPlayerTurn();
         };
 
         $scope.nvd3Options = {
             "chart": {
                 "type": "multiBarChart",
-                "height": 450,
+                "height": 300,
                 "margin": {
                     "top": 20,
                     "right": 20,
@@ -239,33 +280,33 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate', 'mgcrea.ngStrap', 'nv
                 },
                 "yAxis": {
                     "axisLabel": "Nodes Opened",
-                    "axisLabelDistance": -10
-                }
+                    "axisLabelDistance": -20
+                },
+                clipEdge: true,
             }
         };
 
         $scope.createNVD3Data = function(input) {
             let color = "";
-            let name = ""
 
-            if(input.playerNum === 0) {
-                color = "#ED1E23";
-            } else {
+            if(input.playerTurn == 0) {
                 color = "#3D86C6";
+            } else {
+                color = "#ED1E23";
             }
             $scope.nvd3Data.push({
                 //"key": "Move " + input.movesMade,
                 "key": input.moveString,
                 "color": color,
-                "classed":input.moveString,
                 "values": [
                     {
                         "x": input.movesMade,
-                        "y": input.nodeCount,
+                        "y": input.nodeCount
                     }
                 ]
             });
         };
 
         $scope.nvd3Data = [];
+        $scope.getGameUIStates.printPlayerTurn();
     }]);

@@ -254,6 +254,7 @@ angular.module('minmaxalgorithmfactory', [])
                 //let bestMove = this.miniMax(firstEncapMoveState, this.maxPly, true);
                 console.log("The number of nodes that were generated on this search was " + this.nodeCount);
                 bestMove.nodeCount = this.nodeCount;
+                bestMove.playerTurn = this.player;
                 return bestMove;
             }
 

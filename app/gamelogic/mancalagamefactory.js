@@ -13,7 +13,7 @@ angular.module('mancalagamefactory', [])
          * [ 6, 7, 8, 9, 10, 11]
          */
         class MancalaGameLogic {
-            constructor(stones, pots, players, depth) {
+            constructor(stones, pots, players, depth, heuristicPairing) {
                 this.maxDepth = depth;
                 this.blueRemainingPotScore = 0, this.redRemainingPotScore = 0;
                 this.numStones = stones;
@@ -41,15 +41,32 @@ angular.module('mancalagamefactory', [])
                     [0], [0], this.redPotsArray, [0]]);
                 this.printDebug();
                 if (this.numPlayers == 0) {
-
-                    this.blueBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(this.currentState, this.maxDepth, 0,
-                        this, this.heuristicTwo);
-                    this.redBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(this.currentState, this.maxDepth, 1,
-                        this, this.heuristicOne);
+                    let blueClone = [], redClone = [];
+                    let redHeuristic = null;
+                    if(heuristicPairing.redPlayer == 1){
+                        redHeuristic = this.heuristicOne;
+                    } else {
+                        redHeuristic = this.heuristicTwo;
+                    }
+                    let blueHeuristic = null;
+                    if(heuristicPairing.bluePlayer == 1){
+                        blueHeuristic = this.heuristicOne;
+                    } else {
+                        blueHeuristic = this.heuristicTwo;
+                    }
+                    angular.copy(this.currentState, blueClone);
+                    angular.copy(this.currentState, redClone);
+                    this.blueBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(blueClone, this.maxDepth, 0,
+                        this, blueHeuristic);
+                    this.redBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(redClone, this.maxDepth, 1,
+                        this, redHeuristic);
                 }
                 if (this.numPlayers == 1) {
-                    this.conl(this);
-                    this.blueBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(this.currentState, this.maxDepth, 0,
+                    //this.conl(this);
+                    //this.conl(this);
+                    let blueClone = [];
+                    angular.copy(this.currentState, blueClone);
+                    this.blueBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(blueClone, this.maxDepth, 0,
                         this, this.heuristicOne);
                 }
                 this.lastMove = {};
@@ -227,7 +244,7 @@ angular.module('mancalagamefactory', [])
                         console.log("blue made move...");
                         console.log(bestMove);
                         this.lastMove = bestMove;
-                        return this.makeMove(0, bestMove.move, bestMove.direction);
+                        return this.makeMove(1, bestMove.move, bestMove.direction);
                     }
                 }
                 return false;
@@ -303,7 +320,7 @@ angular.module('mancalagamefactory', [])
                     theirStones += (state[this.bluePotEndIndex - 1] + state[this.bluePotStartIndex]) * 2;
                     myScore = (state[this.redRightScoreIndex] + state[this.redLeftScoreIndex]) * 4;
                     theirScore = (state[this.blueRightScoreIndex] + state[this.blueLeftScoreIndex]) * 4;
-                    return (myScore - theirScore) + (myStones - theirStones);
+                    return (myScore - theirScore) * (myStones - theirStones);
                 } else {
                     for (let i = this.redPotStartIndex + 1; i < this.numPots - 1; ++i) {
                         theirStones += state[i];
@@ -315,7 +332,7 @@ angular.module('mancalagamefactory', [])
                     myStones += (state[this.bluePotStartIndex] + state[this.redPotEndIndex - 1]) * 2;
                     myScore = (state[this.blueRightScoreIndex] + state[this.blueLeftScoreIndex]) * 4;
                     theirScore = (state[this.redRightScoreIndex] + state[this.redLeftScoreIndex]) * 4;
-                    return (myScore - theirScore) + (myStones - theirStones);
+                    return (myScore - theirScore) * (myStones - theirStones);
                 }
             }
 
@@ -375,8 +392,8 @@ angular.module('mancalagamefactory', [])
         }
 
         return {
-            newGame: function (numStones, numPots, numPlayers, depth) {
-                return new MancalaGameLogic(numStones, numPots, numPlayers, depth)
+            newGame: function (numStones, numPots, numPlayers, depth, heuristicPairing) {
+                return new MancalaGameLogic(numStones, numPots, numPlayers, depth, heuristicPairing)
             }
         }
     });

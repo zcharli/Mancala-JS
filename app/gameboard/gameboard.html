@@ -1,7 +1,7 @@
 <h1 style="font-weight: bold">Mancala!</h1>
 
 
-<div class="container">
+<div>
     <div class="row">
         <div class="col s12 l6 m6">
             <label for="nstones">Enter Number of stones:</label>
@@ -44,60 +44,83 @@
             </div>
         </div>
     </div>
-    <div class="row" ng-if="gameSettings.showHeuristic">
-        <div class="col s6">
-            <select id="redH">
-                <option value="1" selected>Heuristic 1</option>
-                <option value="2">Heuristic 2</option>
-            </select>
-            <label for="redH">Blue Player Heuristic</label>
+    <div class="row">
+        <div class="col s12 m6 l4">
+            <button class="btn waves-light" ng-click="gameBoardEvents.newGame()">Restart</button>
         </div>
-        <div class="col s6">
-            <select id="blueH">
-                <option value="1">Heuristic 1</option>
-                <option value="2" selected>Heuristic 2</option>
-            </select>
-            <label for="blueH">Blue Player Heuristic</label>
+    </div>
+    <div class="row" ng-if="gameSettings.showHeuristic">
+        <div class="row">
+            <div class="col s6">
+                <select id="redH" ng-model="gameSettings.heuristicPairing.redPlayer">
+                    <option value="1" selected>Heuristic 1</option>
+                    <option value="2">Heuristic 2</option>
+                </select>
+                <label for="redH">Red Player Heuristic</label>
+            </div>
+            <div class="col s6">
+                <select id="blueH" ng-model="gameSettings.heuristicPairing.bluePlayer">
+                    <option value="1">Heuristic 1</option>
+                    <option value="2" selected>Heuristic 2</option>
+                </select>
+                <label for="blueH">Blue Player Heuristic</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col s12 m6 l4">
+                <button class="btn waves-light" ng-click="getGameUIStates.makeAIMove()">Make {{playerName}}'s Move</button>
+            </div>
         </div>
     </div>
 
     <div class="row">
-        <div class="col s6">{{gamePlaying}}</div>
-        <div class="col s6"><button class="btn waves-light" ng-click="gameBoardEvents.newGame()">Restart</button></div>
+        <div class="col s6"><h4><span ng-class="{true: 'mancala-red', false: 'mancala-blue'}[getGameUIStates.isRedTurn()]">{{playerName}}</span>, it's your turn</h4>.</div>
+        <div class="col s6"></div>
+    </div>
 
+    <div class="row" ng-if="gameSettings.gameOver">
+        <div class="s12">
+            <h3>{{winnerMessage}}</h3>
+        </div>
+        <div class="col s6 mancala-blue">
+            <h4>Blue: {{blueScore}}</h4>
+        </div>
+        <div class="col s6 mancala-red">
+            <h4>Red: {{redScore}}</h4>
+        </div>
     </div>
 </div>
+
 
 <table id='mancala-board'>
     <tr class="mancala-board_row" ng-class="{0: 'my-turn', 1: 'not-my-turn'}[getGameUIStates.playerTurn]" id="mancala-board_blue-player">
 
-        <td class="mancala-board_cell mancala-board_score-cell"><div class="circle blue-border">{{getGameUIStates.blueLeftScorePot()}}</div></td>
+        <td class="mancala-board_cell mancala-board_score-cell"><div class="circle blue-border" id="bs-l">{{getGameUIStates.blueLeftScorePot()}}</div></td>
         <td ng-repeat="ballsInHole in getGameUIStates.blueMancalaHoles() track by $index"
             class="mancala-board_cell">
-            <div move-popover="{{$index}} top 0 blue">
+            <div id="" move-popover="{{$index}} top 0 blue {{getGameUIStates.cellChanged($index,0)}}">
             </div>
         </td>
-        <td ng-repeat-end class="mancala-board_cell mancala-board_score-cell"><div class="circle blue-border">{{getGameUIStates.blueRightScorePot()}}</div></td>
+        <td ng-repeat-end class="mancala-board_cell mancala-board_score-cell"><div class="circle blue-border" id="bs-r">{{getGameUIStates.blueRightScorePot()}}</div></td>
     </tr>
 
     <tr class="mancala-board-row" ng-class="{1: 'my-turn', 0: 'not-my-turn'}[getGameUIStates.playerTurn]"  id="mancala-board_red-player">
-        <td class="mancala-board_cell mancala-board_score-cell"><div class="circle red-border">{{getGameUIStates.redLeftScorePot()}}</div></td>
+        <td class="mancala-board_cell mancala-board_score-cell"><div class="circle red-border" id="rs-l">{{getGameUIStates.redLeftScorePot()}}</div></td>
         <td ng-repeat="ballsInHole in getGameUIStates.redMancalaHoles() track by $index"
             class="mancala-board_cell">
-            <div move-popover="{{$index}} bottom 1 red">
+            <div move-popover="{{$index}} bottom 1 red {{getGameUIStates.cellChanged($index,1)}}">
             </div>
         </td>
-        <td ng-repeat-end class="mancala-board_cell mancala-board_score-cell"><div class="circle red-border">{{getGameUIStates.redRightScorePot()}}</div></td>
+        <td ng-repeat-end class="mancala-board_cell mancala-board_score-cell"><div class="circle red-border" id="rs-r">{{getGameUIStates.redRightScorePot()}}</div></td>
     </tr>
 </table>
 <br>
-<div class="container">
-    <div class="row">
-        <nvd3 options="nvd3Options" data="nvd3Data"></nvd3>
-    </div>
-    <div class="row">
-        <div class="col s12">
-            <div ng-bind-html="logBody"></div>
-        </div>
+
+<div class="row">
+    <nvd3 options="nvd3Options" data="nvd3Data"></nvd3>
+</div>
+<div class="row">
+    <div class="col s12">
+        <div ng-bind-html="logBody"></div>
     </div>
 </div>

@@ -1,3 +1,5 @@
+'use-strict';
+
 var app = angular.module('uiComponents', ['ngSanitize']);
 
 // registers native Twitter Bootstrap tooltips
@@ -18,12 +20,21 @@ app.directive('toolTip', function () {
 app.directive('movePopover', ["$popover", "$compile", "$timeout", function ($popover, $compile, $timeout) {
     return {
         restrict: "EAC",
+        //scope: {getGameUIStates: "&"},
         template: function (element, attrs) {
             var attributes = attrs["movePopover"].split(" ");
+            console.log(element)
             if (attributes[3] == "blue") {
-                return "<div class='pop-over-move circle blue-fill'> {{ballsInHole}}</div>"
+                var id = "blue-" + attributes[0];
+                console.log(id)
+                var changedtext = attributes[4];
+                console.log(changedtext);
+                return "<div class='pop-over-move circle blue-fill' id='" + id + "' change-amount='"+id+" "+changedtext+"'> {{ballsInHole}}</div>";
             } else {
-                return "<div class='pop-over-move circle red-fill'> {{ballsInHole}}</div>"
+                var id = "red-" + attributes[0];
+                var changedtext = attributes[4];
+                console.log(changedtext);
+                return "<div class='pop-over-move circle red-fill' id='" + id + "' change-amount='"+id+" "+changedtext+"'> {{ballsInHole}}</div>";
             }
         },
         link: function (scope, element, attrs) {
@@ -42,7 +53,7 @@ app.directive('movePopover', ["$popover", "$compile", "$timeout", function ($pop
             });
 
             var _hide = function () {
-                var pops = $(".popover")
+                var pops = $(".popover");
                 pops.fadeOut(500, function () {
                     $(this).remove();
                 });
@@ -66,15 +77,41 @@ app.directive('movePopover', ["$popover", "$compile", "$timeout", function ($pop
     };
 }]);
 
-app.directive("popoverHtmlUnsafePopup", function () {
-        return {
-            restrict: "EA",
-            replace: true,
-            scope: {title: "@", content: "@", placement: "@", animation: "&", isOpen: "&"},
-            templateUrl: "popover-html-unsafe-popup.html"
-        };
-    })
+app.directive('changeAmount', ['$tooltip', '$timeout','$compile', function ($tooltip, $timeout, $compile) {
+    return {
+        restrict: 'A',
+        //scope: {tooltip:"&"},
+        transclude: false,
+        link: function (scope, element, attrs) {
+            //var e = angular.element(document.getElementById("#rs-r"));
+            //console.log(attrs);
+            var params = attrs["changeAmount"].split(" ");
+            var id = params[0];
+            var changed = params[1];
+            var placement = "";
+            if(id.indexOf("blue") > -1) {
+                placement = "top";
+            } else {
+                placement = "bottom";
+            }
+            console.log(changed)
+            $timeout(function () {
+                var target = $("#" + id);
+                //var changedText = $compile(changed);
+                var changedText = "" + changed;
+                var myTooltip = $tooltip(target,
+                    { title:changedText, trigger:'manual', placement:placement, container:"",animation: 'am-flip-x',}
+                );
+                myTooltip.$promise.then(function () {
+                    myTooltip.show();
+                });
 
-    .directive("popoverHtmlUnsafe", ["$tooltip", function ($tooltip) {
-        return $tooltip("popoverHtmlUnsafe", "popover", "click");
-    }]);
+                $timeout(function () {
+                    myTooltip.$promise.then(function () {
+                        myTooltip.hide();
+                    });
+                }, 2000);
+            }, 500);
+        }
+    };
+}]);
