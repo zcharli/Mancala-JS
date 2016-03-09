@@ -265,6 +265,9 @@ angular.module('minmaxalgorithmfactory', [])
                     let bestValue = {node: {heuristicValue: Number.NEGATIVE_INFINITY}};
                     for (let child of this.prodSystem.produce(moveState.node, maximizingPlayer, this.player)) {
                         ++this.nodeCount;
+                        if(child.node.minMaxLayer) {
+                            child.node.isTerminalNode = true;
+                        }
                         let curMoveState = this.miniMaxAlphaBeta(child, depth - 1, alpha, beta, child.node.minMaxLayer);
                         if (bestValue.node.heuristicValue < curMoveState.node.heuristicValue) {
                             bestValue.move = child.move;
@@ -282,6 +285,9 @@ angular.module('minmaxalgorithmfactory', [])
                 } else {
                     let bestValue = {node: {heuristicValue: Number.POSITIVE_INFINITY}};
                     for (let child of this.prodSystem.produce(moveState.node, maximizingPlayer, Math.abs(this.player - 1))) {
+                        if(!child.node.minMaxLayer) {
+                            child.node.isTerminalNode = true;
+                        }
                         ++this.nodeCount;
                         let curMoveState = this.miniMaxAlphaBeta(child, depth - 1, alpha, beta, !child.node.minMaxLayer);
                         if (bestValue.node.heuristicValue > curMoveState.node.heuristicValue) {

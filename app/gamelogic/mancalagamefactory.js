@@ -266,7 +266,7 @@ angular.module('mancalagamefactory', [])
             }
 
             heuristicOne(state, player) {
-                let myStones = 0, theirStones = 0;
+                let myStones = 0, theirStones = 0, mySafeScore = 0, unreachableStones = 0;
                 if (player === 1) {
                     for (let i = this.redLeftScoreIndex; i <= this.redRightScoreIndex; ++i) {
                         myStones += state[i];
@@ -274,7 +274,9 @@ angular.module('mancalagamefactory', [])
                     for (let i = 0; i <= this.blueRightScoreIndex; ++i) {
                         theirStones += state[i];
                     }
-                    return myStones - theirStones;
+                    mySafeScore += state[this.redLeftScoreIndex] + state[this.redRightScoreIndex];
+                    unreachableStones += state[this.blueLeftScoreIndex] + state[this.blueRightScoreIndex];
+                    return myStones - theirStones + mySafeScore - unreachableStones;
                 } else {
                     for (let i = 0; i <= this.blueRightScoreIndex; ++i) {
                         myStones += state[i];
@@ -282,7 +284,9 @@ angular.module('mancalagamefactory', [])
                     for (let i = this.redLeftScoreIndex; i <= this.redRightScoreIndex; ++i) {
                         theirStones += state[i];
                     }
-                    return myStones - theirStones;
+                    mySafeScore += state[this.blueLeftScoreIndex] + state[this.blueRightScoreIndex];
+                    unreachableStones += state[this.redLeftScoreIndex] + state[this.redRightScoreIndex];
+                    return myStones - theirStones + mySafeScore - unreachableStones;
                 }
             }
 
