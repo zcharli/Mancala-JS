@@ -49,21 +49,21 @@
             <button class="btn waves-light" ng-click="gameBoardEvents.newGame()">Restart</button>
         </div>
         <div class="col s12 m6 l4" ng-if="gameSettings.showAiPlayer">
-            <button class="btn waves-light mancala-blue" ng-disabled="getGameUIStates.isSingleAiPlayerMove()" ng-click="getGameUIStates.makeOpponentsMove()">Make {{playerName}}'s Move</button>
+            <button class="btn waves-light" ng-disabled="getGameUIStates.isSingleAiPlayerMove()" ng-click="getGameUIStates.makeOpponentsMove()">Make {{playerName}}'s Move</button>
         </div>
     </div>
 
     <div class="row" ng-if="gameSettings.showHeuristic">
         <div class="row">
             <div class="col s6">
-                <select id="redH" ng-model="gameSettings.heuristicPairing.redPlayer">
+                <select id="redH" data-ng-model="gameSettings.heuristicPairing.redPlayer">
                     <option value="1" selected>Heuristic 1</option>
                     <option value="2">Heuristic 2</option>
                 </select>
                 <label for="redH">Red Player Heuristic</label>
             </div>
             <div class="col s6">
-                <select id="blueH" ng-model="gameSettings.heuristicPairing.bluePlayer">
+                <select id="blueH" data-ng-model="gameSettings.heuristicPairing.bluePlayer">
                     <option value="1">Heuristic 1</option>
                     <option value="2" selected>Heuristic 2</option>
                 </select>
@@ -72,14 +72,21 @@
         </div>
         <div class="row">
             <div class="col s12 m6 l4">
-                <button class="btn waves-light" ng-click="getGameUIStates.makeOpponentsMove()">Make {{playerName}}'s Move</button>
+                <button class="btn waves-light" ng-disabled="getGameUIStates.isGameOver()"  ng-click="getGameUIStates.makeOpponentsMove()">Make {{playerName}}'s Move</button>
             </div>
         </div>
     </div>
 
     <div class="row">
         <div class="col s6"><h4><span ng-class="{true: 'mancala-red', false: 'mancala-blue'}[getGameUIStates.isRedTurn()]">{{playerName}}</span>, it's your turn</h4>.</div>
-        <div class="col s6"></div>
+        <div class="col s6" ng-if="gameSettings.showHeuristic">
+            <div class="col s6">
+                <b>H1:</b> myStones - theirStones + mySafeScore - unreachableStones
+            </div>
+            <div class="col s6">
+                <b>H2:</b> myScore*4 + myStones*2
+            </div>
+        </div>
     </div>
 
     <div class="row" ng-if="gameSettings.gameOver">

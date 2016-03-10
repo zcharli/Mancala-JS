@@ -45,6 +45,7 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
         $scope.movesMadeByInGame = 0;
         $scope.gameBoardEvents = {
             newGame: function () {
+                if(!$scope.gameSettings.mancalaPots || !$scope.gameSettings.players) return;
                 if($scope.gameSettings.players == 0) {
                     $scope.gameSettings.showHeuristic = true;
                 } else {
@@ -76,7 +77,7 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
                 } else if ($scope.gameSettings.mancalaPots < $scope.gameSettings.numberOfStones - 1) {
                     $scope.gameSettings.mancalaPots += 1;
                 }
-
+                console.log($scope.gameSettings.heuristicPairing)
                 mancalaGame = MancalaGameFactory
                     .newGame($scope.gameSettings.numberOfStones,
                         $scope.gameSettings.mancalaPots,
@@ -85,16 +86,8 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
                         $scope.gameSettings.heuristicPairing);
                 $scope.mancalaGame = mancalaGame;
                 $scope.getGameUIStates.playerTurn = $scope.mancalaGame.getPlayerTurn();
-                //if ($scope.gameSettings.players == 1) {
-                //    // Timer to set up both players to play
-                //    $scope.determineAiMoves();
-                //}
                 $scope.whatChanged = new Array($scope.gameSettings.mancalaPots* 2 + 4);
                 $scope.getGameUIStates.printPlayerTurn();
-                //let element = angular.element.find("#rs-r");
-                //console.log(element);
-                //let myTooltip = $tooltip(element, {title: 'My Title'});
-                //myTooltip.show();
             }
         };
 
@@ -122,16 +115,7 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
                 $scope.logMove(player);
                 $scope.getGameUIStates.updatePotsChanged();
             }
-            //let playerTurn = $scope.getGameUIStates.playerTurn;
-            //let playerNum = $scope.gameSettings.players;
-            //let winner = $scope.checkWinner();
-            ////if (winner == -1) {
-            ////    if (playerNum == 1) {
-            ////        if (playerTurn == 0) {
-            ////            $scope.determineAiMoves();
-            ////        }
-            ////    }
-            ////}
+            $scope.checkWinner();
             $scope.getGameUIStates.printPlayerTurn();
             return true;
         };
@@ -169,6 +153,9 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
         };
 
         $scope.getGameUIStates = {
+            heuristicChanged: function(e) {
+                console.log(e)
+            },
             updatePotsChanged: function() {
                 let gameRef = $scope.mancalaGame;
                 let changedArray = gameRef.whatChanged;
@@ -265,6 +252,9 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
                 } else {
                     $scope.playerName = "Red";
                 }
+            },
+            isGameOver: function() {
+                return $scope.mancalaGame.gameOver;
             },
             makeOpponentsMove: function() {
                 $scope.determineAiMoves();

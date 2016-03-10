@@ -71,7 +71,7 @@ angular.module('mancalagamefactory', [])
                         this, this.heuristicOne);
                 }
                 this.lastMove = {};
-                this.whatChanged = new Array(this.numPots * 2 + 4);
+                this.whatChanged = new Array(this.numPots * 2 + 4).fill(0);
             }
 
             /**
@@ -93,9 +93,13 @@ angular.module('mancalagamefactory', [])
                     player, direction);
 
                 if (player === 0 && (lastStonePlacement === this.blueLeftScoreIndex
-                    || lastStonePlacement === this.blueRightScoreIndex)) return true;
+                    || lastStonePlacement === this.blueRightScoreIndex)) {
+                    return this.checkGameOver();
+                }
                 if (player === 1 && (lastStonePlacement === this.redLeftScoreIndex
-                    || lastStonePlacement === this.redRightScoreIndex)) return true;
+                    || lastStonePlacement === this.redRightScoreIndex)) {
+                    return this.checkGameOver();
+                }
 
                 if (player === 0 && this.currentState[lastStonePlacement] === 1) {
                     // Check lastStone in Blue
@@ -108,17 +112,8 @@ angular.module('mancalagamefactory', [])
                         this.takeOpponentsStones(lastStonePlacement, player, cellNumber);
                     }
                 }
-                let itsOverOnBlueSide = true;
-                let itsOverOnRedSide = true;
-                for (let i = this.bluePotStartIndex; i < this.bluePotEndIndex; ++i) {
-                    itsOverOnBlueSide  = this.currentState[i] === 0 && itsOverOnBlueSide;
-                }
 
-                for (let i = this.redPotStartIndex; i < this.redPotEndIndex; ++i) {
-                    itsOverOnRedSide  = this.currentState[i] === 0 && itsOverOnRedSide;
-                }
-                this.gameOver = itsOverOnRedSide || itsOverOnBlueSide;
-
+                this.checkGameOver();
 
                 if (this.gameOver) {
                     console.log("Game is over.");
@@ -129,6 +124,20 @@ angular.module('mancalagamefactory', [])
                 this.currentTurn = Math.abs(this.currentTurn - 1);
                 console.log(this.currentTurn)
                 return true;
+            }
+
+            checkGameOver() {
+                let itsOverOnBlueSide = true;
+                let itsOverOnRedSide = true;
+                for (let i = this.bluePotStartIndex; i < this.bluePotEndIndex; ++i) {
+                    itsOverOnBlueSide  = this.currentState[i] === 0 && itsOverOnBlueSide;
+                }
+
+                for (let i = this.redPotStartIndex; i < this.redPotEndIndex; ++i) {
+                    itsOverOnRedSide  = this.currentState[i] === 0 && itsOverOnRedSide;
+                }
+                this.gameOver = itsOverOnRedSide || itsOverOnBlueSide;
+                return !this.gameOver;
             }
 
             /**
@@ -337,11 +346,12 @@ angular.module('mancalagamefactory', [])
                     theirStones += (state[this.bluePotEndIndex - 1] + state[this.bluePotStartIndex]) * 2;
                     myScore = (state[this.redRightScoreIndex] + state[this.redLeftScoreIndex]) * 4;
                     theirScore = (state[this.blueRightScoreIndex] + state[this.blueLeftScoreIndex]) * 4;
-                    return (myScore - theirScore) * (myStones - theirStones);
+                    return myScore + myStones;
+                    //return (myScore - theirScore) * (myStones - theirStones);
                 } else {
-                    for (let i = this.redPotStartIndex + 1; i < this.numPots - 1; ++i) {
-                        theirStones += state[i];
-                    }
+                    //for (let i = this.redPotStartIndex + 1; i < this.numPots - 1; ++i) {
+                    //    theirStones += state[i];
+                    //}
                     theirStones += (state[this.redPotEndIndex - 1] + state[this.redPotStartIndex]) * 2;
                     for (let i = this.bluePotStartIndex + 1; i < this.numPots - 1; ++i) {
                         myStones += state[i];
@@ -349,7 +359,8 @@ angular.module('mancalagamefactory', [])
                     myStones += (state[this.bluePotStartIndex] + state[this.redPotEndIndex - 1]) * 2;
                     myScore = (state[this.blueRightScoreIndex] + state[this.blueLeftScoreIndex]) * 4;
                     theirScore = (state[this.redRightScoreIndex] + state[this.redLeftScoreIndex]) * 4;
-                    return (myScore - theirScore) * (myStones - theirStones);
+                    //return (myScore - theirScore) * (myStones - theirStones);
+                    return myScore + myStones;
                 }
             }
 
