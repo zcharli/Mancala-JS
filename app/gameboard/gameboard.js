@@ -29,6 +29,7 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
         $scope.blueScore = "";
         $scope.redScore = "";
 
+        $scope.whatChanged = new Array($scope.gameSettings.mancalaPots* 2 + 4);
         let mancalaGame = MancalaGameFactory
             .newGame($scope.gameSettings.numberOfStones,
                 $scope.gameSettings.mancalaPots,
@@ -81,6 +82,7 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
                     // Timer to set up both players to play
                     $scope.determineAiMoves();
                 }
+                $scope.whatChanged = new Array($scope.gameSettings.mancalaPots* 2 + 4);
                 $scope.getGameUIStates.printPlayerTurn();
                 //let element = angular.element.find("#rs-r");
                 //console.log(element);
@@ -111,6 +113,7 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
                 $scope.getGameUIStates.redMancalaHoles();
                 $scope.getGameUIStates.playerTurn = mancalaGame.getPlayerTurn();
                 $scope.logMove(player);
+                $scope.getGameUIStates.updatePotsChanged();
             }
             let playerTurn = $scope.getGameUIStates.playerTurn;
             let playerNum = $scope.gameSettings.players;
@@ -152,9 +155,14 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
             moveString += "<br>while generating " + lastMove.nodeCount + " nodes.";
             lastMove.moveString = moveString;
             $scope.createNVD3Data(lastMove);
+
         };
 
         $scope.getGameUIStates = {
+            updatePotsChanged: function() {
+              let changedArray = $scope.mancalaGame.whatChanged;
+                console.log(changedArray)
+            },
             blueMancalaHoles: function () {
                 //console.log($scope.mancalaGame.bluePots);
                 $scope.bluePotArray.length = 0;
@@ -259,6 +267,7 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
                     $scope.getGameUIStates.playerTurn = mancalaGame.getPlayerTurn();
                 }
             }
+            $scope.getGameUIStates.updatePotsChanged();
             $scope.checkWinner();
             $scope.getGameUIStates.printPlayerTurn();
         };
@@ -266,7 +275,7 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
         $scope.nvd3Options = {
             "chart": {
                 "type": "multiBarChart",
-                "height": 300,
+                "height": 450,
                 "margin": {
                     "top": 20,
                     "right": 20,
