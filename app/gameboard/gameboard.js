@@ -16,6 +16,7 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
             players: 2,
             maxDepth: 8,
             showHeuristic: false,
+            showAiPlayer: false,
             gameOver: false,
             heuristicPairing: {
                 redPlayer: "1",
@@ -50,6 +51,12 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
                     $scope.gameSettings.showHeuristic = false;
                 }
 
+                if($scope.gameSettings.players == 1) {
+                    $scope.gameSettings.showAiPlayer = true;
+                } else {
+                    $scope.gameSettings.showAiPlayer = false;
+                }
+
                 $scope.gameSettings.gameOver = false;
                 $scope.movesMadeByInGame = 0;
                 $scope.nvd3Data = [];
@@ -78,10 +85,10 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
                         $scope.gameSettings.heuristicPairing);
                 $scope.mancalaGame = mancalaGame;
                 $scope.getGameUIStates.playerTurn = $scope.mancalaGame.getPlayerTurn();
-                if ($scope.gameSettings.players == 1) {
-                    // Timer to set up both players to play
-                    $scope.determineAiMoves();
-                }
+                //if ($scope.gameSettings.players == 1) {
+                //    // Timer to set up both players to play
+                //    $scope.determineAiMoves();
+                //}
                 $scope.whatChanged = new Array($scope.gameSettings.mancalaPots* 2 + 4);
                 $scope.getGameUIStates.printPlayerTurn();
                 //let element = angular.element.find("#rs-r");
@@ -115,16 +122,16 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
                 $scope.logMove(player);
                 $scope.getGameUIStates.updatePotsChanged();
             }
-            let playerTurn = $scope.getGameUIStates.playerTurn;
-            let playerNum = $scope.gameSettings.players;
-            let winner = $scope.checkWinner();
-            if (winner == -1) {
-                if (playerNum == 1) {
-                    if (playerTurn == 0) {
-                        $scope.determineAiMoves();
-                    }
-                }
-            }
+            //let playerTurn = $scope.getGameUIStates.playerTurn;
+            //let playerNum = $scope.gameSettings.players;
+            //let winner = $scope.checkWinner();
+            ////if (winner == -1) {
+            ////    if (playerNum == 1) {
+            ////        if (playerTurn == 0) {
+            ////            $scope.determineAiMoves();
+            ////        }
+            ////    }
+            ////}
             $scope.getGameUIStates.printPlayerTurn();
             return true;
         };
@@ -153,6 +160,9 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
                 moveString += "the right direction ";
             }
             moveString += "<br>while generating " + lastMove.nodeCount + " nodes.";
+            if(lastMove.jackpot) {
+                moveString += "A jackpot was hit, taking "+lastMove.jackpot+"<br>stones for himself.";
+            }
             lastMove.moveString = moveString;
             $scope.createNVD3Data(lastMove);
 
@@ -160,8 +170,67 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
 
         $scope.getGameUIStates = {
             updatePotsChanged: function() {
-              let changedArray = $scope.mancalaGame.whatChanged;
-                console.log(changedArray)
+                let gameRef = $scope.mancalaGame;
+                let changedArray = gameRef.whatChanged;
+                console.log(changedArray);
+
+                if(changedArray[gameRef.blueLeftScoreIndex] != 0) {
+                    $scope.getGameUIStates.showTimer("bs-l",
+                        String(changedArray[gameRef.blueLeftScoreIndex]),
+                        "top");
+                }
+                if(changedArray[gameRef.blueRightScoreIndex] != 0) {
+                    $scope.getGameUIStates.showTimer("bs-r",
+                        String(changedArray[gameRef.blueRightScoreIndex]),
+                        "top");
+                }
+                if(changedArray[gameRef.redLeftScoreIndex] != 0) {
+                    $scope.getGameUIStates.showTimer("rs-l",
+                        String(changedArray[gameRef.redLeftScoreIndex]),
+                        "bottom");
+                }
+                if(changedArray[gameRef.redRightScoreIndex] != 0) {
+                    $scope.getGameUIStates.showTimer("rs-r",
+                        String(changedArray[gameRef.redRightScoreIndex]),
+                        "bottom");
+                }
+
+                for(let i = gameRef.bluePotStartIndex; i < gameRef.bluePotEndIndex; ++i) {
+                    if(changedArray[i] != 0) {
+                        $scope.getGameUIStates.showTimer("bs-"+(i-gameRef.bluePotStartIndex),
+                            String(changedArray[i]),
+                            "top");
+                    }
+                }
+
+                for(let i = gameRef.redPotStartIndex; i < gameRef.redPotEndIndex; ++i) {
+                    if(changedArray[i] != 0) {
+                        console.log("rs-"+(i-gameRef.redPotStartIndex))
+                        $scope.getGameUIStates.showTimer("rs-"+(i-gameRef.redPotStartIndex),
+                            String(changedArray[i]),
+                            "bottom");
+                    }
+                }
+
+            },
+            showTimer: function(id, changedText, placement) {
+                $timeout(function () {
+                    var target = $("#" + id);
+                    var myTooltip = $tooltip(target, {
+                        title:changedText,
+                        trigger:'manual',
+                        placement:placement,
+                    });
+                    myTooltip.$promise.then(function () {
+                        myTooltip.show();
+                    });
+
+                    $timeout(function () {
+                        myTooltip.$promise.then(function () {
+                            myTooltip.hide();
+                        });
+                    }, 2000);
+                }, 50);
             },
             blueMancalaHoles: function () {
                 //console.log($scope.mancalaGame.bluePots);
@@ -197,19 +266,19 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
                     $scope.playerName = "Red";
                 }
             },
-            makeAIMove: function() {
+            makeOpponentsMove: function() {
                 $scope.determineAiMoves();
             },
             isRedTurn: function() {
-              if($scope.mancalaGame.getPlayerTurn() == 1) {
-                  return true;
-              } else {
-                  return false;
-              }
+              return $scope.mancalaGame.getPlayerTurn() == 1;
             },
             cellChanged: function(index , player) {
                 //console.log(index)
                 return $scope.movesMadeByInGame;
+            },
+            isSingleAiPlayerMove: function() {
+                console.log($scope.mancalaGame.getPlayerTurn())
+                return $scope.mancalaGame.getPlayerTurn() == 1;
             },
             playerTurn: $scope.mancalaGame.getPlayerTurn()
         };
@@ -253,10 +322,10 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
                         $scope.getGameUIStates.blueMancalaHoles();
                         $scope.getGameUIStates.redMancalaHoles();
                         $scope.getGameUIStates.playerTurn = mancalaGame.getPlayerTurn();
-                        if ($scope.getGameUIStates.playerTurn == 0) {
-                            $scope.getGameUIStates.printPlayerTurn();
-                            $scope.determineAiMoves();
-                        }
+                        //if ($scope.getGameUIStates.playerTurn == 0) {
+                        //    $scope.getGameUIStates.printPlayerTurn();
+                        //    $scope.determineAiMoves();
+                        //}
                     }
                 }
             } else if (numPlayers == 2) {

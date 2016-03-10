@@ -33,7 +33,8 @@ angular.module('mancalagamefactory', [])
                 this.redRightScoreIndex = this.redPotEndIndex;
                 for (let i = 0; i < this.numPlayers; ++i)
                     this.playersPlaying.push(PlayerFactory.newPlayer(i))
-
+                this.scoreIndex = [this.blueLeftScoreIndex, this.blueRightScoreIndex,
+                    this.redLeftScoreIndex, this.redRightScoreIndex];
                 // Generate a random turn, 0 is Blue, 1 is Red
                 this.currentTurn = Math.floor(Math.random() * 2);
                 this.gameOver = false;
@@ -265,6 +266,7 @@ angular.module('mancalagamefactory', [])
              */
             takeOpponentsStones(index, player, cellNumber) {
                 let closestPot = 0;
+                let jackpot = 0;
                 if (player === 0) {
                     console.log("Blue Player made a jackpot move!");
                     // Taking from red
@@ -272,6 +274,7 @@ angular.module('mancalagamefactory', [])
                         : this.blueLeftScoreIndex;
                     let potToTakeFrom = index + this.numPots + 2; // Two score pots in between
                     this.whatChanged[potToTakeFrom] = -this.currentState[potToTakeFrom];
+                    jackpot = this.currentState[potToTakeFrom];
                     this.currentState[closestPot] += this.currentState[potToTakeFrom];
                     this.currentState[potToTakeFrom] = 0;
                     this.whatChanged[closestPot] += this.currentState[potToTakeFrom];
@@ -286,7 +289,10 @@ angular.module('mancalagamefactory', [])
                     this.currentState[closestPot] += this.currentState[potToTakeFrom];
                     this.currentState[potToTakeFrom] = 0;
                     this.whatChanged[closestPot] += this.currentState[potToTakeFrom];
+                    jackpot = this.currentState[potToTakeFrom];
                 }
+                this.lastMove.jackpot = jackpot;
+                return jackpot;
             }
 
             getPlayerTurn() {

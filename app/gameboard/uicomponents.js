@@ -23,18 +23,18 @@ app.directive('movePopover', ["$popover", "$compile", "$timeout", function ($pop
         //scope: {getGameUIStates: "&"},
         template: function (element, attrs) {
             var attributes = attrs["movePopover"].split(" ");
-            console.log(element)
+            //console.log(element)
             if (attributes[3] == "blue") {
                 var id = "blue-" + attributes[0];
-                console.log(id)
-                var changedtext = attributes[4];
-                console.log(changedtext);
-                return "<div class='pop-over-move circle blue-fill' id='" + id + "' change-amount='"+id+" "+changedtext+"'> {{ballsInHole}}</div>";
+                //console.log(id)
+                //var changedtext = attributes[4];
+                //console.log(changedtext);
+                return "<div class='pop-over-move circle blue-fill' id='" + id + "'>{{ballsInHole}}</div>";
             } else {
                 var id = "red-" + attributes[0];
-                var changedtext = attributes[4];
-                console.log(changedtext);
-                return "<div class='pop-over-move circle red-fill' id='" + id + "' change-amount='"+id+" "+changedtext+"'> {{ballsInHole}}</div>";
+                //var changedtext = attributes[4];
+                ///console.log(changedtext);
+                return "<div class='pop-over-move circle red-fill' id='" + id + "'>{{ballsInHole}}</div>";
             }
         },
         link: function (scope, element, attrs) {
