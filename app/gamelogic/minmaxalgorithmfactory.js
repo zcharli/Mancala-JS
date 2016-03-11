@@ -280,6 +280,7 @@ angular.module('minmaxalgorithmfactory', [])
                             bestValue.move = child.move;
                             bestValue.direction = child.direction;
                             bestValue.node = child.node;
+                            bestValue.node.heuristicValue =  curMoveState.node.heuristicValue;
                         }
                         alpha = bestValue.node.heuristicValue > alpha.node.heuristicValue ? bestValue : alpha;
                         if (beta.node.heuristicValue <= alpha.node.heuristicValue) {
@@ -301,6 +302,7 @@ angular.module('minmaxalgorithmfactory', [])
                             bestValue.move = child.move;
                             bestValue.direction = child.direction;
                             bestValue.node = child.node;
+                            bestValue.node.heuristicValue =  curMoveState.node.heuristicValue;
                         }
                         beta = bestValue.node.heuristicValue < beta.node.heuristicValue ? bestValue : beta;
                         if (beta.node.heuristicValue <= alpha.node.heuristicValue) {
@@ -326,6 +328,7 @@ angular.module('minmaxalgorithmfactory', [])
                             bestValue.move = child.move;
                             bestValue.direction = child.direction;
                             bestValue.node = child.node;
+                            bestValue.node.heuristicValue =  curMoveState.node.heuristicValue;
                         }
                     }
                     return bestValue;
@@ -338,6 +341,7 @@ angular.module('minmaxalgorithmfactory', [])
                             bestValue.move = child.move;
                             bestValue.direction = child.direction;
                             bestValue.node = child.node;
+                            bestValue.node.heuristicValue =  curMoveState.node.heuristicValue;
                         }
                     }
                     return bestValue;
