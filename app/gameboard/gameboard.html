@@ -42,6 +42,17 @@
                            data-ng-model="gameSettings.maxDepth">
                 </div>
             </div>
+            <div class="row">
+                <div class="switch">
+                    <label for="alphaBeta">Alpha Beta:</label>
+                    <label>
+                        Off
+                        <input id="alphaBeta" data-ng-change="gameBoardEvents.newGame()" ng-model="gameSettings.alphaBeta" type="checkbox">
+                        <span class="lever"></span>
+                        On
+                    </label>
+                </div>
+            </div>
         </div>
     </div>
     <div class="row">

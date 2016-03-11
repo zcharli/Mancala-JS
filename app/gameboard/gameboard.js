@@ -18,6 +18,7 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
             showHeuristic: false,
             showAiPlayer: false,
             gameOver: false,
+            alphaBeta: true,
             heuristicPairing: {
                 redPlayer: "1",
                 bluePlayer: "2"
@@ -35,7 +36,9 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
             .newGame($scope.gameSettings.numberOfStones,
                 $scope.gameSettings.mancalaPots,
                 $scope.gameSettings.players,
-                $scope.gameSettings.heuristicPairing);
+                $scope.gameSettings.heuristicPairing,
+                $scope.gameSettings.alphaBeta
+            );
 
         // Set up game variables
         $scope.mancalaGame = mancalaGame;
@@ -45,6 +48,7 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
         $scope.movesMadeByInGame = 0;
         $scope.gameBoardEvents = {
             newGame: function () {
+                console.log($scope.gameSettings.alphaBeta)
                 if(!$scope.gameSettings.mancalaPots || !$scope.gameSettings.players) return;
                 if($scope.gameSettings.players == 0) {
                     $scope.gameSettings.showHeuristic = true;
@@ -83,7 +87,9 @@ angular.module('myApp.gameboard', ['ngRoute', 'ngAnimate','ngSanitize', 'mgcrea.
                         $scope.gameSettings.mancalaPots,
                         $scope.gameSettings.players,
                         $scope.gameSettings.maxDepth,
-                        $scope.gameSettings.heuristicPairing);
+                        $scope.gameSettings.heuristicPairing,
+                        $scope.gameSettings.alphaBeta
+                    );
                 $scope.mancalaGame = mancalaGame;
                 $scope.getGameUIStates.playerTurn = $scope.mancalaGame.getPlayerTurn();
                 $scope.whatChanged = new Array($scope.gameSettings.mancalaPots* 2 + 4);

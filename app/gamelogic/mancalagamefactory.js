@@ -13,7 +13,7 @@ angular.module('mancalagamefactory', [])
          * [ 6, 7, 8, 9, 10, 11]
          */
         class MancalaGameLogic {
-            constructor(stones, pots, players, depth, heuristicPairing) {
+            constructor(stones, pots, players, depth, heuristicPairing, aB) {
                 this.maxDepth = depth;
                 this.blueRemainingPotScore = 0, this.redRemainingPotScore = 0;
                 this.numStones = stones;
@@ -58,9 +58,9 @@ angular.module('mancalagamefactory', [])
                     angular.copy(this.currentState, blueClone);
                     angular.copy(this.currentState, redClone);
                     this.blueBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(blueClone, this.maxDepth, 0,
-                        this, blueHeuristic);
+                        this, blueHeuristic, aB);
                     this.redBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(redClone, this.maxDepth, 1,
-                        this, redHeuristic);
+                        this, redHeuristic, aB);
                 }
                 if (this.numPlayers == 1) {
                     //this.conl(this);
@@ -68,7 +68,7 @@ angular.module('mancalagamefactory', [])
                     let blueClone = [];
                     angular.copy(this.currentState, blueClone);
                     this.blueBot = MinMaxAlgorithm.newMancalaMinMaxAlgorithm(blueClone, this.maxDepth, 0,
-                        this, this.heuristicOne);
+                        this, this.heuristicOne, aB);
                 }
                 this.lastMove = {};
                 this.whatChanged = new Array(this.numPots * 2 + 4).fill(0);
@@ -420,8 +420,8 @@ angular.module('mancalagamefactory', [])
         }
 
         return {
-            newGame: function (numStones, numPots, numPlayers, depth, heuristicPairing) {
-                return new MancalaGameLogic(numStones, numPots, numPlayers, depth, heuristicPairing)
+            newGame: function (numStones, numPots, numPlayers, depth, heuristicPairing, aB) {
+                return new MancalaGameLogic(numStones, numPots, numPlayers, depth, heuristicPairing, aB)
             }
         }
     });

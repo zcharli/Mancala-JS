@@ -236,22 +236,28 @@ angular.module('minmaxalgorithmfactory', [])
         }
 
         class MinMaxAlgorithm {
-            constructor(currentState, maxDepth, player, mancalaGame, heuristicFunc) {
+            constructor(currentState, maxDepth, player, mancalaGame, heuristicFunc, aB) {
                 this.root = new MinMaxNode(currentState, 0);
                 this.maxPly = maxDepth;
                 this.prodSystem = new MancalaProductionSystem(mancalaGame, player, heuristicFunc);
                 this.game = mancalaGame;
                 this.player = player;
                 this.nodeCount = 0;
+                this.alphaBeta = aB;
             }
 
             findBestMove(state) {
                 this.nodeCount = 0;
                 let currentNode = new MinMaxNode(state, 0, 0, true, false);
                 let firstEncapMoveState = {node: currentNode, direction: null};
-                let bestMove = this.miniMaxAlphaBeta(firstEncapMoveState, this.maxPly, {node: {heuristicValue: Number.NEGATIVE_INFINITY}},
-                    {node: {heuristicValue: Number.POSITIVE_INFINITY}}, true);
-                //let bestMove = this.miniMax(firstEncapMoveState, this.maxPly, true);
+                let bestMove = {};
+                if(this.alphaBeta) {
+                    bestMove =
+                        this.miniMaxAlphaBeta(firstEncapMoveState, this.maxPly, {node: {heuristicValue: Number.NEGATIVE_INFINITY}},
+                        {node: {heuristicValue: Number.POSITIVE_INFINITY}}, true);
+                } else {
+                    bestMove = this.miniMax(firstEncapMoveState, this.maxPly, true);
+                }
                 console.log("The number of nodes that were generated on this search was " + this.nodeCount);
                 bestMove.nodeCount = this.nodeCount;
                 bestMove.playerTurn = this.player;
@@ -340,8 +346,8 @@ angular.module('minmaxalgorithmfactory', [])
         }
 
         return {
-            newMancalaMinMaxAlgorithm: function (state, maxDepth, player, game, heuristicFunction) {
-                return new MinMaxAlgorithm(state, maxDepth, player, game, heuristicFunction);
+            newMancalaMinMaxAlgorithm: function (state, maxDepth, player, game, heuristicFunction, alpha) {
+                return new MinMaxAlgorithm(state, maxDepth, player, game, heuristicFunction, alpha);
             }
         }
     });
