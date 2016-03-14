@@ -296,9 +296,9 @@ angular.module('mancalagamefactory', [])
                     let potToTakeFrom = index - this.numPots - 2;
                     this.whatChanged[potToTakeFrom] = -this.currentState[potToTakeFrom];
                     this.currentState[closestPot] += this.currentState[potToTakeFrom];
+                    jackpot = this.currentState[potToTakeFrom];
                     this.currentState[potToTakeFrom] = 0;
                     this.whatChanged[closestPot] += this.currentState[potToTakeFrom];
-                    jackpot = this.currentState[potToTakeFrom];
                 }
                 this.lastMove.jackpot = jackpot;
                 return jackpot;

@@ -250,6 +250,7 @@ angular.module('minmaxalgorithmfactory', [])
                 this.nodeCount = 0;
                 let currentNode = new MinMaxNode(state, 0, 0, true, false);
                 let firstEncapMoveState = {node: currentNode, direction: null};
+                this.p = 0;
                 let bestMove = {};
                 if(this.alphaBeta) {
                     bestMove =
@@ -261,6 +262,7 @@ angular.module('minmaxalgorithmfactory', [])
                 console.log("The number of nodes that were generated on this search was " + this.nodeCount);
                 bestMove.nodeCount = this.nodeCount;
                 bestMove.playerTurn = this.player;
+
                 return bestMove;
             }
 
@@ -271,11 +273,13 @@ angular.module('minmaxalgorithmfactory', [])
                 if (maximizingPlayer) {
                     let bestValue = {node: {heuristicValue: Number.NEGATIVE_INFINITY}};
                     for (let child of this.prodSystem.produce(moveState.node, maximizingPlayer, this.player)) {
-                        ++this.nodeCount;
+
                         if(child.node.minMaxLayer) {
                             child.node.isTerminalNode = true;
                         }
+
                         let curMoveState = this.miniMaxAlphaBeta(child, depth - 1, alpha, beta, child.node.minMaxLayer);
+                        ++this.nodeCount;
                         if (bestValue.node.heuristicValue < curMoveState.node.heuristicValue) {
                             bestValue.move = child.move;
                             bestValue.direction = child.direction;
@@ -285,18 +289,18 @@ angular.module('minmaxalgorithmfactory', [])
                         if (beta.node.heuristicValue <= alpha.node.heuristicValue) {
                             break;
                         }
+
                     }
-                    //console.log("maximizing best value: " + bestValue.node.heuristicValue +
-                    //    " with move " + bestValue.move + " with direction " + bestValue.direction);
                     return bestValue;
                 } else {
                     let bestValue = {node: {heuristicValue: Number.POSITIVE_INFINITY}};
                     for (let child of this.prodSystem.produce(moveState.node, maximizingPlayer, Math.abs(this.player - 1))) {
+
                         if(!child.node.minMaxLayer) {
                             child.node.isTerminalNode = true;
                         }
-                        ++this.nodeCount;
                         let curMoveState = this.miniMaxAlphaBeta(child, depth - 1, alpha, beta, !child.node.minMaxLayer);
+                        ++this.nodeCount;
                         if (bestValue.node.heuristicValue > curMoveState.node.heuristicValue) {
                             bestValue.move = child.move;
                             bestValue.direction = child.direction;
@@ -307,8 +311,6 @@ angular.module('minmaxalgorithmfactory', [])
                             break;
                         }
                     }
-                    //console.log("minimizing best value: " + bestValue.node.heuristicValue +
-                    //    " with move " + bestValue.move + " with direction " + bestValue.direction);
                     return bestValue;
                 }
             }
