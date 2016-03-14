@@ -24,6 +24,7 @@ angular.module('minmaxalgorithmfactory', [])
                 this.minMaxLayer = minMaxLayer;
                 this.isTerminalNode = termNode;
             }
+
             //
             //getHashCode() {
             //    let hash = 0, i, len = this.state;
@@ -87,7 +88,7 @@ angular.module('minmaxalgorithmfactory', [])
                             nextMove = decrementer;
                             continue;
                         }
-                        if (player === 0){
+                        if (player === 0) {
                             console.log("Something bad happened to red's side...");
                         }
                         if (player == 1 && (nextPot === this.blueLeftScoreIndex
@@ -125,7 +126,7 @@ angular.module('minmaxalgorithmfactory', [])
                             nextMove();
                             continue;
                         }
-                        if (player == 1){
+                        if (player == 1) {
                             console.log("Something bad happened on the blue side.")
                         }
                         state[nextMove()] += 1;
@@ -231,7 +232,17 @@ angular.module('minmaxalgorithmfactory', [])
                     newNode = this.generateNode(i, 1, node, minMax, player);
                     newMoveStates.push({node: newNode, direction: 1, move: i});
                 }
-                return newMoveStates;
+                return this.shuffleArray(newMoveStates);
+            }
+
+            shuffleArray(array) {
+                for (var i = array.length - 1; i > 0; i--) {
+                    var j = Math.floor(Math.random() * (i + 1));
+                    var temp = array[i];
+                    array[i] = array[j];
+                    array[j] = temp;
+                }
+                return array;
             }
         }
 
@@ -252,10 +263,10 @@ angular.module('minmaxalgorithmfactory', [])
                 let firstEncapMoveState = {node: currentNode, direction: null};
                 this.p = 0;
                 let bestMove = {};
-                if(this.alphaBeta) {
+                if (this.alphaBeta) {
                     bestMove =
                         this.miniMaxAlphaBeta(firstEncapMoveState, this.maxPly, {node: {heuristicValue: Number.NEGATIVE_INFINITY}},
-                        {node: {heuristicValue: Number.POSITIVE_INFINITY}}, true);
+                            {node: {heuristicValue: Number.POSITIVE_INFINITY}}, true);
                 } else {
                     bestMove = this.miniMax(firstEncapMoveState, this.maxPly, true);
                 }
@@ -274,7 +285,7 @@ angular.module('minmaxalgorithmfactory', [])
                     let bestValue = {node: {heuristicValue: Number.NEGATIVE_INFINITY}};
                     for (let child of this.prodSystem.produce(moveState.node, maximizingPlayer, this.player)) {
 
-                        if(child.node.minMaxLayer) {
+                        if (child.node.minMaxLayer) {
                             child.node.isTerminalNode = true;
                         }
 
@@ -296,10 +307,10 @@ angular.module('minmaxalgorithmfactory', [])
                     let bestValue = {node: {heuristicValue: Number.POSITIVE_INFINITY}};
                     for (let child of this.prodSystem.produce(moveState.node, maximizingPlayer, Math.abs(this.player - 1))) {
 
-                        if(!child.node.minMaxLayer) {
+                        if (!child.node.minMaxLayer) {
                             child.node.isTerminalNode = true;
                         }
-                        let curMoveState = this.miniMaxAlphaBeta(child, depth - 1, alpha, beta, !child.node.minMaxLayer);
+                        let curMoveState = this.miniMaxAlphaBeta(child, depth - 1, alpha, beta, child.node.minMaxLayer);
                         ++this.nodeCount;
                         if (bestValue.node.heuristicValue > curMoveState.node.heuristicValue) {
                             bestValue.move = child.move;
