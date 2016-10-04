@@ -1,5 +1,5 @@
 # Mancala!
-
+A two player game played between a smart computer AI and you! An experiment with AngularJS, ES6 features, and MinMax with Alpha beta pruning. 
 
 ## Getting Started
 ```
@@ -10,7 +10,4 @@ bower install
 ### Prerequisites
 
 Node js
-
-
-
-More details comming soon.
+Npm takes care of everything else
